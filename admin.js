@@ -578,10 +578,14 @@ function setupSkillsEvents() {
 function updateResumeDOM() {
     // Update personal information
     document.querySelector('.resume-header h1').textContent = resumeData.personal.name;
-    const contactInfo = document.querySelector('.resume-contact').querySelectorAll('p');
-    contactInfo[0].textContent = `${resumeData.personal.location} | ${resumeData.personal.phone}`;
-    const emailLink = contactInfo[1].querySelector('a');
-    contactInfo[1].innerHTML = `${resumeData.personal.email} | <a href="https://${resumeData.personal.linkedin}" target="_blank">${resumeData.personal.linkedin}</a>`;
+    
+    // Update contact info in sidebar
+    const contactInfo = document.querySelector('.contact-info');
+    const contactItems = contactInfo.querySelectorAll('p');
+    contactItems[0].innerHTML = `<i class="fas fa-map-marker-alt"></i> ${resumeData.personal.location}`;
+    contactItems[1].innerHTML = `<i class="fas fa-phone"></i> ${resumeData.personal.phone}`;
+    contactItems[2].innerHTML = `<i class="fas fa-envelope"></i> ${resumeData.personal.email}`;
+    contactItems[3].innerHTML = `<i class="fab fa-linkedin"></i> ${resumeData.personal.linkedin}`;
     
     // Update work experience
     const experienceSection = document.getElementById('experience');
@@ -644,7 +648,7 @@ function updateResumeDOM() {
     let skillsHTML = `<h2 class="section-title">Skills</h2><ul class="skills-list">`;
     
     resumeData.skills.forEach(skill => {
-        skillsHTML += `<li><strong>${skill.category}:</strong> ${skill.description}</li>`;
+        skillsHTML += `<li><strong>${skill.category}</strong> ${skill.description}</li>`;
     });
     
     skillsHTML += `</ul>`;

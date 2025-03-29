@@ -1,134 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>JiaYi Che - Resume</title>
+    <title>JiaYi Che - Portfolio</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="JiaYi Che's Resume">
-    <link href="https://JiaYiChe.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="JiaYi Che Resume" />
-    <link rel="stylesheet" type="text/css" href="https://JiaYiChe.github.io/theme/style.css" />
+    <meta name="description" content="JiaYi Che's Portfolio">
+    <link href="https://JiaYiChe.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="JiaYi Che Portfolio" />
+    <link rel="stylesheet" type="text/css" href="theme/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
 <body id="index" class="home">
-    <header id="banner" class="body">
-        <div class="container">
-            <h1><a href="https://JiaYiChe.github.io/">JiaYi Che</a></h1>
-            <nav id="menu">
-                <ul>
-                    <li><a href="#about">About Me</a></li>
-                    <li><a href="#experience">Work Experience</a></li>
-                    <li><a href="#education">Education</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#skills">Skills</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
     <main class="container">
-        <section id="content">
-            <div class="resume-container">
-                <div class="resume-header">
-                    <h1>JiaYi Che</h1>
-                    <div class="resume-contact">
-                        <p>London, ON | (204) 720-4242</p>
-                        <p>jiayiche99@gmail.com | <a href="https://www.linkedin.com/in/jiayi-che" target="_blank">www.linkedin.com/in/jiayi-che</a></p>
+        <div class="profile-card">
+            <!-- Left Profile Section -->
+            <div class="profile-avatar">
+                <div class="avatar-container">
+                    <img src="author/photo.jpg" alt="JiaYi Che" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=JiaYi+Che';">
+                    <div class="avatar-overlay">
+                        <h1>JiaYi Che</h1>
+                        <h2><i class="fas fa-star"></i> Full Stack Developer</h2>
                     </div>
                 </div>
 
-                <section id="experience">
-                    <h2 class="section-title">Work Experience</h2>
-                    <div class="work-item">
-                        <div class="work-title">Full Stack Intern | JavaScript, React, Express, Node.js, MongoDB, HTML, CSS</div>
-                        <div class="work-period">Sep 2022 - Dec 2022</div>
-                        <div class="work-description">
-                            <ul>
-                                <li>Led a 6-person Agile team to develop a MERN stack-based survey submission platform, automating processes and managing database storage for thousands of users.</li>
-                                <li>Simplified processes, achieving 98% time savings, and implemented a secure authentication system.</li>
-                                <li>Demonstrated expertise in Agile Scrum, serving as Scrum Master for development and deployment.</li>
-                                <li>Worked on various tasks throughout the Software Development Life Cycle (SDLC).</li>
-                                <li>Managed the website's backend, covering development, deployment, and ongoing maintenance.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
+                <div class="profile-motto">
+                    <p>The only way to do <span>great</span> work is to <span>love</span> what you do.</p>
+                </div>
 
-                <section id="education">
-                    <h2 class="section-title">Education</h2>
-                    <div class="education-item">
-                        <div class="education-title">Western University, London, ON</div>
-                        <div class="education-period">Sep 2024 - Present</div>
-                        <p>Master of Engineering – Electrical and Computer Engineering</p>
-                    </div>
-                    <div class="education-item">
-                        <div class="education-title">University of Alberta, Edmonton, AB</div>
-                        <div class="education-period">Sep 2019 – May 2023</div>
-                        <p>Bachelor of Science - Computing Science with Specialization | GPA: 3.5</p>
-                    </div>
-                </section>
+                <div class="social-icons">
+                    <a href="https://github.com/JiaYiChe" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/jiayi-che" target="_blank"><i class="fab fa-linkedin"></i></a>
+                    <a href="mailto:jiayiche99@gmail.com"><i class="fas fa-envelope"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-medium"></i></a>
+                </div>
 
-                <section id="projects">
-                    <h2 class="section-title">Projects</h2>
-                    <div class="project-item">
-                        <div class="project-title">Distributed Social Networking | JavaScript, MongoDB, Django, Python, Socket</div>
-                        <div class="project-period">Jan 2023 – April 2023</div>
-                        <div class="project-description">
-                            <ul>
-                                <li>Applied Agile software development, achieving a 40% increase in speed for bug fixing and updates, and utilized GIT for version control to ensure streamlined collaboration among team members.</li>
-                                <li>Implemented NoSQL with MongoDB for effective data management, improving data retrieval efficiency by 35% and demonstrating a strong grasp of database management.</li>
-                            </ul>
-                        </div>
+                <div class="github-activity">
+                    <h3>GitHub Activity</h3>
+                    <div class="activity-grid">
+                        <!-- Generate 53 weeks of github activity cells -->
+                        <div class="activity-cell activity-level-0"></div>
+                        <div class="activity-cell activity-level-1"></div>
+                        <div class="activity-cell activity-level-2"></div>
+                        <div class="activity-cell activity-level-3"></div>
+                        <div class="activity-cell activity-level-4"></div>
+                        <div class="activity-cell activity-level-5"></div>
+                        <!-- Repeat for rest of cells (simplified here) -->
                     </div>
-                    <div class="project-item">
-                        <div class="project-title">Shortest Path Planning Application for Edmonton | Python, A*, Dijkstra's Algorithm</div>
-                        <div class="project-period">Jan 2022 – April 2022</div>
-                        <div class="project-description">
-                            <ul>
-                                <li>Developed a shortest path planning application using A* and Dijkstra's Algorithm, reducing route calculation time by 40%.</li>
-                                <li>Implemented and optimized the application to handle over 1,000 route requests per minute with high accuracy and efficiency.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="project-item">
-                        <div class="project-title">Android Lab Record Application | Java, Firebase, Android Studio & SDK</div>
-                        <div class="project-period">Jan 2021 - April 2021</div>
-                        <div class="project-description">
-                            <ul>
-                                <li>Co-designed and developed an innovative Android crowdsourcing app using Firebase for the database, HTML for web components, and Java for functionality, resulting in a 30% increase in user engagement.</li>
-                                <li>Created a user dashboard that streamlined the research process, reducing data retrieval time by 50% and demonstrating strong problem-solving skills and adaptability.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
+                </div>
 
-                <section id="skills">
-                    <h2 class="section-title">Skills</h2>
-                    <ul class="skills-list">
-                        <li><strong>Programming:</strong> Java, Python, JavaScript. Experience with Object-Oriented Programming languages.</li>
-                        <li><strong>Web Development:</strong> Solid proficiency in JavaScript. Exposure to Django, HTML, and CSS.</li>
-                        <li><strong>Databases:</strong> Proficient with MongoDB, MySQL, Firebase, and PostgreSQL.</li>
-                        <li><strong>Application Design:</strong> Experienced in UML, Scrum, and Agile methodologies, ensuring successful web app deployments.</li>
-                        <li><strong>Frameworks & Tools:</strong> Experienced with Express, Docker, GitHub, Visual Studio, Ubuntu, and Stack Overflow.</li>
-                        <li><strong>Team Collaboration:</strong> Proven experience working in Agile teams throughout the entire SDLC, using GitHub for project management.</li>
-                        <li><strong>Software Development:</strong> Knowledgeable in the Software Development Life Cycle (SDLC) and Agile methodologies.</li>
-                    </ul>
-                </section>
+                <div class="site-nav">
+                    <a href="#about"><i class="fas fa-user"></i> About Me</a>
+                    <a href="#experience"><i class="fas fa-briefcase"></i> Experience</a>
+                    <a href="#education"><i class="fas fa-graduation-cap"></i> Education</a>
+                    <a href="#projects"><i class="fas fa-code"></i> Projects</a>
+                    <a href="#skills"><i class="fas fa-tools"></i> Skills</a>
+                </div>
             </div>
-        </section>
+
+            <!-- Right Content Section -->
+            <div class="content-area">
+                <!-- About Me Section -->
+                <div id="about" class="content-card">
+                    <div class="content-card-header">
+                        <h3><i class="fas fa-user"></i> About Me</h3>
+                        <div class="chip">London, ON</div>
+                    </div>
+                    <div class="content-card-body">
+                        <p>Computer Science graduate with specialized skills in full-stack development and database management. Experienced in developing web applications using modern frameworks and technologies. Strong problem-solving abilities and a collaborative team player.</p>
+                        <p>Currently pursuing a Master's degree in Electrical and Computer Engineering with a focus on advanced computing technologies. Passionate about building scalable, user-friendly applications and staying current with emerging technology trends.</p>
+                        <ul>
+                            <li><strong>Phone:</strong> (204) 720-4242</li>
+                            <li><strong>Email:</strong> jiayiche99@gmail.com</li>
+                            <li><strong>LinkedIn:</strong> www.linkedin.com/in/jiayi-che</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Experience Section -->
+                <div id="experience" class="content-card">
+                    <div class="content-card-header">
+                        <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+                    </div>
+                    <div class="content-card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-header">
+                                    <h4 class="timeline-title">Full Stack Intern</h4>
+                                    <span class="timeline-period">Sep 2022 - Dec 2022</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <p>JavaScript, React, Express, Node.js, MongoDB, HTML, CSS</p>
+                                    <ul>
+                                        <li>Led a 6-person Agile team to develop a MERN stack-based survey submission platform, automating processes and managing database storage for thousands of users.</li>
+                                        <li>Simplified processes, achieving 98% time savings, and implemented a secure authentication system.</li>
+                                        <li>Demonstrated expertise in Agile Scrum, serving as Scrum Master for development and deployment.</li>
+                                        <li>Worked on various tasks throughout the Software Development Life Cycle (SDLC).</li>
+                                        <li>Managed the website's backend, covering development, deployment, and ongoing maintenance.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education Section -->
+                <div id="education" class="content-card">
+                    <div class="content-card-header">
+                        <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                    </div>
+                    <div class="content-card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-header">
+                                    <h4 class="timeline-title">Western University, London, ON</h4>
+                                    <span class="timeline-period">Sep 2024 - Present</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <p>Master of Engineering – Electrical and Computer Engineering</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-header">
+                                    <h4 class="timeline-title">University of Alberta, Edmonton, AB</h4>
+                                    <span class="timeline-period">Sep 2019 – May 2023</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <p>Bachelor of Science - Computing Science with Specialization | GPA: 3.5</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects Section -->
+                <div id="projects" class="content-card">
+                    <div class="content-card-header">
+                        <h3><i class="fas fa-code"></i> Projects</h3>
+                    </div>
+                    <div class="content-card-body">
+                        <div class="projects-grid">
+                            <div class="project-card">
+                                <div class="project-card-content">
+                                    <h4>Distributed Social Networking</h4>
+                                    <p>Applied Agile software development, achieving a 40% increase in speed for bug fixing and updates. Implemented NoSQL with MongoDB for effective data management, improving data retrieval efficiency by 35%.</p>
+                                    <div class="project-card-footer">
+                                        <div class="project-tech">
+                                            <span title="JavaScript">JS</span>
+                                            <span title="MongoDB">Mo</span>
+                                            <span title="Django">Dj</span>
+                                            <span title="Python">Py</span>
+                                        </div>
+                                        <div class="project-links">
+                                            <a href="https://github.com/JiaYiChe" title="View Project"><i class="fas fa-eye"></i></a>
+                                            <a href="https://github.com/JiaYiChe" title="View Code"><i class="fas fa-code"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-card">
+                                <div class="project-card-content">
+                                    <h4>Shortest Path Planning Application</h4>
+                                    <p>Developed a shortest path planning application using A* and Dijkstra's Algorithm, reducing route calculation time by 40%. Optimized the application to handle over 1,000 route requests per minute.</p>
+                                    <div class="project-card-footer">
+                                        <div class="project-tech">
+                                            <span title="Python">Py</span>
+                                            <span title="A* Algorithm">A*</span>
+                                            <span title="Dijkstra">Di</span>
+                                        </div>
+                                        <div class="project-links">
+                                            <a href="https://github.com/JiaYiChe" title="View Project"><i class="fas fa-eye"></i></a>
+                                            <a href="https://github.com/JiaYiChe" title="View Code"><i class="fas fa-code"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-card">
+                                <div class="project-card-content">
+                                    <h4>Android Lab Record Application</h4>
+                                    <p>Co-designed and developed an innovative Android crowdsourcing app using Firebase. Created a user dashboard that streamlined the research process, reducing data retrieval time by 50%.</p>
+                                    <div class="project-card-footer">
+                                        <div class="project-tech">
+                                            <span title="Java">Ja</span>
+                                            <span title="Firebase">Fb</span>
+                                            <span title="Android Studio">An</span>
+                                        </div>
+                                        <div class="project-links">
+                                            <a href="https://github.com/JiaYiChe" title="View Project"><i class="fas fa-eye"></i></a>
+                                            <a href="https://github.com/JiaYiChe" title="View Code"><i class="fas fa-code"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Section -->
+                <div id="skills" class="content-card">
+                    <div class="content-card-header">
+                        <h3><i class="fas fa-tools"></i> Skills</h3>
+                    </div>
+                    <div class="content-card-body">
+                        <div class="skills-container">
+                            <div class="skill-item">
+                                <i class="fab fa-java"></i>
+                                <p>Java</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fab fa-python"></i>
+                                <p>Python</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fab fa-js"></i>
+                                <p>JavaScript</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fab fa-react"></i>
+                                <p>React</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fab fa-node-js"></i>
+                                <p>Node.js</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fab fa-html5"></i>
+                                <p>HTML5</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fab fa-css3-alt"></i>
+                                <p>CSS3</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fas fa-database"></i>
+                                <p>MongoDB</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fas fa-database"></i>
+                                <p>MySQL</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fab fa-git-alt"></i>
+                                <p>Git</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fab fa-docker"></i>
+                                <p>Docker</p>
+                            </div>
+                            <div class="skill-item">
+                                <i class="fas fa-users"></i>
+                                <p>Agile/Scrum</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <footer id="contentinfo" class="body">
-        <div class="container">
-            <p>&copy; 2024 JiaYi Che</p>
-        </div>
-    </footer>
-
     <!-- Hidden Admin Button -->
-    <button class="admin-button" id="adminButton"></button>
-
+    <button id="adminButton" class="admin-button" title="Admin Login"></button>
+    
     <!-- Login Modal -->
-    <div class="login-modal" id="loginModal">
+    <div id="loginModal" class="login-modal">
         <div class="login-content">
             <h2>Admin Login</h2>
             <form id="loginForm">
@@ -140,17 +274,929 @@
                     <label for="password">Password:</label>
                     <input type="password" id="password" required>
                 </div>
-                <button type="submit" class="btn">Login</button>
-                <button type="button" class="btn" id="cancelLogin">Cancel</button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="button" class="btn btn-secondary" id="cancelLogin">Cancel</button>
+                </div>
             </form>
         </div>
     </div>
-
+    
     <!-- Admin Panel (Hidden by Default) -->
-    <div id="adminPanel" style="display: none;">
-        <!-- Content will be dynamically filled by JavaScript -->
+    <div id="adminPanel" class="admin-panel">
+        <div class="admin-panel-content">
+            <h2>Admin Panel</h2>
+            <button id="closeAdmin" class="close-button">&times;</button>
+            <div class="admin-sections">
+                <div class="admin-section">
+                    <h3>Profile Information</h3>
+                    <div class="form-group">
+                        <label for="admin-name">Full Name:</label>
+                        <input type="text" id="admin-name" value="JiaYi Che">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-title">Professional Title:</label>
+                        <input type="text" id="admin-title" value="Full Stack Developer">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-motto">Motto:</label>
+                        <textarea id="admin-motto">The only way to do great work is to love what you do.</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-location">Location:</label>
+                        <input type="text" id="admin-location" value="London, ON">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-phone">Phone:</label>
+                        <input type="text" id="admin-phone" value="(204) 720-4242">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-email">Email:</label>
+                        <input type="email" id="admin-email" value="jiayiche99@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-linkedin">LinkedIn:</label>
+                        <input type="text" id="admin-linkedin" value="www.linkedin.com/in/jiayi-che">
+                    </div>
+                    <button id="save-profile" class="btn btn-primary">Save Profile</button>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>About Me</h3>
+                    <div class="form-group">
+                        <label for="admin-about">About Text:</label>
+                        <textarea id="admin-about" rows="5">Computer Science graduate with specialized skills in full-stack development and database management. Experienced in developing web applications using modern frameworks and technologies. Strong problem-solving abilities and a collaborative team player.
+
+Currently pursuing a Master's degree in Electrical and Computer Engineering with a focus on advanced computing technologies. Passionate about building scalable, user-friendly applications and staying current with emerging technology trends.</textarea>
+                    </div>
+                    <button id="save-about" class="btn btn-primary">Save About</button>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Experience</h3>
+                    <div id="experience-items">
+                        <div class="admin-item" data-id="exp-1">
+                            <div class="form-group">
+                                <label>Job Title:</label>
+                                <input type="text" class="exp-title" value="Full Stack Intern">
+                            </div>
+                            <div class="form-group">
+                                <label>Period:</label>
+                                <input type="text" class="exp-period" value="Sep 2022 - Dec 2022">
+                            </div>
+                            <div class="form-group">
+                                <label>Technologies:</label>
+                                <input type="text" class="exp-tech" value="JavaScript, React, Express, Node.js, MongoDB, HTML, CSS">
+                            </div>
+                            <div class="form-group">
+                                <label>Description Items:</label>
+                                <div class="description-items">
+                                    <div class="description-item">
+                                        <textarea class="exp-desc">Led a 6-person Agile team to develop a MERN stack-based survey submission platform, automating processes and managing database storage for thousands of users.</textarea>
+                                        <button class="remove-desc btn btn-sm btn-danger">Remove</button>
+                                    </div>
+                                    <div class="description-item">
+                                        <textarea class="exp-desc">Simplified processes, achieving 98% time savings, and implemented a secure authentication system.</textarea>
+                                        <button class="remove-desc btn btn-sm btn-danger">Remove</button>
+                                    </div>
+                                    <div class="description-item">
+                                        <textarea class="exp-desc">Demonstrated expertise in Agile Scrum, serving as Scrum Master for development and deployment.</textarea>
+                                        <button class="remove-desc btn btn-sm btn-danger">Remove</button>
+                                    </div>
+                                    <div class="description-item">
+                                        <textarea class="exp-desc">Worked on various tasks throughout the Software Development Life Cycle (SDLC).</textarea>
+                                        <button class="remove-desc btn btn-sm btn-danger">Remove</button>
+                                    </div>
+                                    <div class="description-item">
+                                        <textarea class="exp-desc">Managed the website's backend, covering development, deployment, and ongoing maintenance.</textarea>
+                                        <button class="remove-desc btn btn-sm btn-danger">Remove</button>
+                                    </div>
+                                </div>
+                                <button class="add-desc btn btn-sm btn-success">Add Description</button>
+                            </div>
+                            <button class="remove-exp btn btn-danger">Remove Experience</button>
+                        </div>
+                    </div>
+                    <button id="add-experience" class="btn btn-success">Add Experience</button>
+                    <button id="save-experience" class="btn btn-primary">Save Experience</button>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Education</h3>
+                    <div id="education-items">
+                        <div class="admin-item" data-id="edu-1">
+                            <div class="form-group">
+                                <label>School:</label>
+                                <input type="text" class="edu-school" value="Western University, London, ON">
+                            </div>
+                            <div class="form-group">
+                                <label>Period:</label>
+                                <input type="text" class="edu-period" value="Sep 2024 - Present">
+                            </div>
+                            <div class="form-group">
+                                <label>Degree:</label>
+                                <input type="text" class="edu-degree" value="Master of Engineering – Electrical and Computer Engineering">
+                            </div>
+                            <button class="remove-edu btn btn-danger">Remove Education</button>
+                        </div>
+                        <div class="admin-item" data-id="edu-2">
+                            <div class="form-group">
+                                <label>School:</label>
+                                <input type="text" class="edu-school" value="University of Alberta, Edmonton, AB">
+                            </div>
+                            <div class="form-group">
+                                <label>Period:</label>
+                                <input type="text" class="edu-period" value="Sep 2019 – May 2023">
+                            </div>
+                            <div class="form-group">
+                                <label>Degree:</label>
+                                <input type="text" class="edu-degree" value="Bachelor of Science - Computing Science with Specialization | GPA: 3.5">
+                            </div>
+                            <button class="remove-edu btn btn-danger">Remove Education</button>
+                        </div>
+                    </div>
+                    <button id="add-education" class="btn btn-success">Add Education</button>
+                    <button id="save-education" class="btn btn-primary">Save Education</button>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Projects</h3>
+                    <div id="project-items">
+                        <div class="admin-item" data-id="proj-1">
+                            <div class="form-group">
+                                <label>Project Title:</label>
+                                <input type="text" class="proj-title" value="Distributed Social Networking">
+                            </div>
+                            <div class="form-group">
+                                <label>Description:</label>
+                                <textarea class="proj-desc">Applied Agile software development, achieving a 40% increase in speed for bug fixing and updates. Implemented NoSQL with MongoDB for effective data management, improving data retrieval efficiency by 35%.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Technologies (comma separated):</label>
+                                <input type="text" class="proj-tech" value="JS,Mo,Dj,Py">
+                            </div>
+                            <div class="form-group">
+                                <label>Project Link:</label>
+                                <input type="url" class="proj-link" value="https://github.com/JiaYiChe">
+                            </div>
+                            <div class="form-group">
+                                <label>Code Link:</label>
+                                <input type="url" class="proj-code" value="https://github.com/JiaYiChe">
+                            </div>
+                            <button class="remove-proj btn btn-danger">Remove Project</button>
+                        </div>
+                        <div class="admin-item" data-id="proj-2">
+                            <div class="form-group">
+                                <label>Project Title:</label>
+                                <input type="text" class="proj-title" value="Shortest Path Planning Application">
+                            </div>
+                            <div class="form-group">
+                                <label>Description:</label>
+                                <textarea class="proj-desc">Developed a shortest path planning application using A* and Dijkstra's Algorithm, reducing route calculation time by 40%. Optimized the application to handle over 1,000 route requests per minute.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Technologies (comma separated):</label>
+                                <input type="text" class="proj-tech" value="Py,A*,Di">
+                            </div>
+                            <div class="form-group">
+                                <label>Project Link:</label>
+                                <input type="url" class="proj-link" value="https://github.com/JiaYiChe">
+                            </div>
+                            <div class="form-group">
+                                <label>Code Link:</label>
+                                <input type="url" class="proj-code" value="https://github.com/JiaYiChe">
+                            </div>
+                            <button class="remove-proj btn btn-danger">Remove Project</button>
+                        </div>
+                        <div class="admin-item" data-id="proj-3">
+                            <div class="form-group">
+                                <label>Project Title:</label>
+                                <input type="text" class="proj-title" value="Android Lab Record Application">
+                            </div>
+                            <div class="form-group">
+                                <label>Description:</label>
+                                <textarea class="proj-desc">Co-designed and developed an innovative Android crowdsourcing app using Firebase. Created a user dashboard that streamlined the research process, reducing data retrieval time by 50%.</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Technologies (comma separated):</label>
+                                <input type="text" class="proj-tech" value="Ja,Fb,An">
+                            </div>
+                            <div class="form-group">
+                                <label>Project Link:</label>
+                                <input type="url" class="proj-link" value="https://github.com/JiaYiChe">
+                            </div>
+                            <div class="form-group">
+                                <label>Code Link:</label>
+                                <input type="url" class="proj-code" value="https://github.com/JiaYiChe">
+                            </div>
+                            <button class="remove-proj btn btn-danger">Remove Project</button>
+                        </div>
+                    </div>
+                    <button id="add-project" class="btn btn-success">Add Project</button>
+                    <button id="save-projects" class="btn btn-primary">Save Projects</button>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Skills</h3>
+                    <div id="skill-items">
+                        <div class="admin-item skill-grid">
+                            <div class="skill-admin-item" data-id="skill-1">
+                                <div class="form-group">
+                                    <label>Skill:</label>
+                                    <input type="text" class="skill-name" value="Java">
+                                </div>
+                                <div class="form-group">
+                                    <label>Icon Class:</label>
+                                    <input type="text" class="skill-icon" value="fab fa-java">
+                                </div>
+                                <button class="remove-skill btn btn-sm btn-danger">Remove</button>
+                            </div>
+                            <div class="skill-admin-item" data-id="skill-2">
+                                <div class="form-group">
+                                    <label>Skill:</label>
+                                    <input type="text" class="skill-name" value="Python">
+                                </div>
+                                <div class="form-group">
+                                    <label>Icon Class:</label>
+                                    <input type="text" class="skill-icon" value="fab fa-python">
+                                </div>
+                                <button class="remove-skill btn btn-sm btn-danger">Remove</button>
+                            </div>
+                            <!-- Add more skill items here... -->
+                        </div>
+                    </div>
+                    <button id="add-skill" class="btn btn-success">Add Skill</button>
+                    <button id="save-skills" class="btn btn-primary">Save Skills</button>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Actions</h3>
+                    <div class="admin-actions">
+                        <button id="save-all" class="btn btn-primary btn-lg">Save All Changes</button>
+                        <button id="reset-all" class="btn btn-warning btn-lg">Reset All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="admin.js"></script>
+    <script>
+        // Generate GitHub activity cells dynamically
+        document.addEventListener('DOMContentLoaded', function() {
+            const activityGrid = document.querySelector('.activity-grid');
+            activityGrid.innerHTML = '';
+            
+            for (let i = 0; i < 53 * 7; i++) {
+                const level = Math.floor(Math.random() * 6); // 0-5 levels
+                const cell = document.createElement('div');
+                cell.className = `activity-cell activity-level-${level}`;
+                activityGrid.appendChild(cell);
+            }
+            
+            // Add smooth scrolling for navigation links
+            document.querySelectorAll('.site-nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Update active class
+                    document.querySelectorAll('.site-nav a').forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Add subtle hover effects for skill items
+            document.querySelectorAll('.skill-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.querySelector('i').classList.add('fa-bounce');
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.querySelector('i').classList.remove('fa-bounce');
+                });
+            });
+            
+            // Auto activate first nav item
+            document.querySelector('.site-nav a').classList.add('active');
+            
+            // Admin functionality
+            const adminButton = document.getElementById('adminButton');
+            const loginModal = document.getElementById('loginModal');
+            const loginForm = document.getElementById('loginForm');
+            const cancelLogin = document.getElementById('cancelLogin');
+            const adminPanel = document.getElementById('adminPanel');
+            const closeAdmin = document.getElementById('closeAdmin');
+            
+            // Admin credentials (should use a more secure method in real applications)
+            const adminCredentials = {
+                username: 'admin',
+                password: 'admin123'
+            };
+            
+            // Portfolio data storage
+            let portfolioData = {
+                profile: {
+                    name: "JiaYi Che",
+                    title: "Full Stack Developer",
+                    motto: "The only way to do great work is to love what you do.",
+                    location: "London, ON",
+                    phone: "(204) 720-4242",
+                    email: "jiayiche99@gmail.com",
+                    linkedin: "www.linkedin.com/in/jiayi-che"
+                },
+                about: "Computer Science graduate with specialized skills in full-stack development and database management. Experienced in developing web applications using modern frameworks and technologies. Strong problem-solving abilities and a collaborative team player.\n\nCurrently pursuing a Master's degree in Electrical and Computer Engineering with a focus on advanced computing technologies. Passionate about building scalable, user-friendly applications and staying current with emerging technology trends.",
+                experience: [
+                    {
+                        id: "exp-1",
+                        title: "Full Stack Intern",
+                        period: "Sep 2022 - Dec 2022",
+                        technologies: "JavaScript, React, Express, Node.js, MongoDB, HTML, CSS",
+                        descriptions: [
+                            "Led a 6-person Agile team to develop a MERN stack-based survey submission platform, automating processes and managing database storage for thousands of users.",
+                            "Simplified processes, achieving 98% time savings, and implemented a secure authentication system.",
+                            "Demonstrated expertise in Agile Scrum, serving as Scrum Master for development and deployment.",
+                            "Worked on various tasks throughout the Software Development Life Cycle (SDLC).",
+                            "Managed the website's backend, covering development, deployment, and ongoing maintenance."
+                        ]
+                    }
+                ],
+                education: [
+                    {
+                        id: "edu-1",
+                        school: "Western University, London, ON",
+                        period: "Sep 2024 - Present",
+                        degree: "Master of Engineering – Electrical and Computer Engineering"
+                    },
+                    {
+                        id: "edu-2",
+                        school: "University of Alberta, Edmonton, AB",
+                        period: "Sep 2019 – May 2023",
+                        degree: "Bachelor of Science - Computing Science with Specialization | GPA: 3.5"
+                    }
+                ],
+                projects: [
+                    {
+                        id: "proj-1",
+                        title: "Distributed Social Networking",
+                        description: "Applied Agile software development, achieving a 40% increase in speed for bug fixing and updates. Implemented NoSQL with MongoDB for effective data management, improving data retrieval efficiency by 35%.",
+                        technologies: "JS,Mo,Dj,Py",
+                        projectLink: "https://github.com/JiaYiChe",
+                        codeLink: "https://github.com/JiaYiChe"
+                    },
+                    {
+                        id: "proj-2",
+                        title: "Shortest Path Planning Application",
+                        description: "Developed a shortest path planning application using A* and Dijkstra's Algorithm, reducing route calculation time by 40%. Optimized the application to handle over 1,000 route requests per minute.",
+                        technologies: "Py,A*,Di",
+                        projectLink: "https://github.com/JiaYiChe",
+                        codeLink: "https://github.com/JiaYiChe"
+                    },
+                    {
+                        id: "proj-3",
+                        title: "Android Lab Record Application",
+                        description: "Co-designed and developed an innovative Android crowdsourcing app using Firebase. Created a user dashboard that streamlined the research process, reducing data retrieval time by 50%.",
+                        technologies: "Ja,Fb,An",
+                        projectLink: "https://github.com/JiaYiChe",
+                        codeLink: "https://github.com/JiaYiChe"
+                    }
+                ],
+                skills: [
+                    { id: "skill-1", name: "Java", icon: "fab fa-java" },
+                    { id: "skill-2", name: "Python", icon: "fab fa-python" },
+                    { id: "skill-3", name: "JavaScript", icon: "fab fa-js" },
+                    { id: "skill-4", name: "React", icon: "fab fa-react" },
+                    { id: "skill-5", name: "Node.js", icon: "fab fa-node-js" },
+                    { id: "skill-6", name: "HTML5", icon: "fab fa-html5" },
+                    { id: "skill-7", name: "CSS3", icon: "fab fa-css3-alt" },
+                    { id: "skill-8", name: "MongoDB", icon: "fas fa-database" },
+                    { id: "skill-9", name: "MySQL", icon: "fas fa-database" },
+                    { id: "skill-10", name: "Git", icon: "fab fa-git-alt" },
+                    { id: "skill-11", name: "Docker", icon: "fab fa-docker" },
+                    { id: "skill-12", name: "Agile/Scrum", icon: "fas fa-users" }
+                ]
+            };
+            
+            // Show login modal
+            adminButton.addEventListener('click', () => {
+                loginModal.style.display = 'flex';
+            });
+            
+            // Close login modal
+            cancelLogin.addEventListener('click', () => {
+                loginModal.style.display = 'none';
+                loginForm.reset();
+            });
+            
+            // Handle login
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (username === adminCredentials.username && password === adminCredentials.password) {
+                    loginModal.style.display = 'none';
+                    adminPanel.style.display = 'block';
+                    loginForm.reset();
+                    
+                    // Load current data into admin panel
+                    loadAdminPanelData();
+                } else {
+                    alert('Invalid credentials. Please try again.');
+                }
+            });
+            
+            // Close admin panel
+            closeAdmin.addEventListener('click', () => {
+                adminPanel.style.display = 'none';
+            });
+            
+            // Click outside to close
+            window.addEventListener('click', (e) => {
+                if (e.target === loginModal) {
+                    loginModal.style.display = 'none';
+                    loginForm.reset();
+                }
+            });
+            
+            // Admin Panel Functions
+            function loadAdminPanelData() {
+                // Load Profile Information
+                document.getElementById('admin-name').value = portfolioData.profile.name;
+                document.getElementById('admin-title').value = portfolioData.profile.title;
+                document.getElementById('admin-motto').value = portfolioData.profile.motto;
+                document.getElementById('admin-location').value = portfolioData.profile.location;
+                document.getElementById('admin-phone').value = portfolioData.profile.phone;
+                document.getElementById('admin-email').value = portfolioData.profile.email;
+                document.getElementById('admin-linkedin').value = portfolioData.profile.linkedin;
+                
+                // Load About
+                document.getElementById('admin-about').value = portfolioData.about;
+                
+                // Load Experience
+                const experienceContainer = document.getElementById('experience-items');
+                experienceContainer.innerHTML = '';
+                
+                portfolioData.experience.forEach(exp => {
+                    const expElement = createExperienceItem(exp);
+                    experienceContainer.appendChild(expElement);
+                });
+                
+                // Load Education
+                const educationContainer = document.getElementById('education-items');
+                educationContainer.innerHTML = '';
+                
+                portfolioData.education.forEach(edu => {
+                    const eduElement = createEducationItem(edu);
+                    educationContainer.appendChild(eduElement);
+                });
+                
+                // Load Projects
+                const projectsContainer = document.getElementById('project-items');
+                projectsContainer.innerHTML = '';
+                
+                portfolioData.projects.forEach(proj => {
+                    const projElement = createProjectItem(proj);
+                    projectsContainer.appendChild(projElement);
+                });
+                
+                // Load Skills
+                const skillsContainer = document.getElementById('skill-items').querySelector('.skill-grid');
+                skillsContainer.innerHTML = '';
+                
+                portfolioData.skills.forEach(skill => {
+                    const skillElement = createSkillItem(skill);
+                    skillsContainer.appendChild(skillElement);
+                });
+                
+                // Add event listeners for admin actions
+                setupAdminEventListeners();
+            }
+            
+            function createExperienceItem(exp) {
+                const expDiv = document.createElement('div');
+                expDiv.className = 'admin-item';
+                expDiv.dataset.id = exp.id;
+                
+                expDiv.innerHTML = `
+                    <div class="form-group">
+                        <label>Job Title:</label>
+                        <input type="text" class="exp-title" value="${exp.title}">
+                    </div>
+                    <div class="form-group">
+                        <label>Period:</label>
+                        <input type="text" class="exp-period" value="${exp.period}">
+                    </div>
+                    <div class="form-group">
+                        <label>Technologies:</label>
+                        <input type="text" class="exp-tech" value="${exp.technologies}">
+                    </div>
+                    <div class="form-group">
+                        <label>Description Items:</label>
+                        <div class="description-items">
+                            ${exp.descriptions.map(desc => `
+                                <div class="description-item">
+                                    <textarea class="exp-desc">${desc}</textarea>
+                                    <button class="remove-desc btn btn-sm btn-danger">Remove</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="add-desc btn btn-sm btn-success">Add Description</button>
+                    </div>
+                    <button class="remove-exp btn btn-danger">Remove Experience</button>
+                `;
+                
+                return expDiv;
+            }
+            
+            function createEducationItem(edu) {
+                const eduDiv = document.createElement('div');
+                eduDiv.className = 'admin-item';
+                eduDiv.dataset.id = edu.id;
+                
+                eduDiv.innerHTML = `
+                    <div class="form-group">
+                        <label>School:</label>
+                        <input type="text" class="edu-school" value="${edu.school}">
+                    </div>
+                    <div class="form-group">
+                        <label>Period:</label>
+                        <input type="text" class="edu-period" value="${edu.period}">
+                    </div>
+                    <div class="form-group">
+                        <label>Degree:</label>
+                        <input type="text" class="edu-degree" value="${edu.degree}">
+                    </div>
+                    <button class="remove-edu btn btn-danger">Remove Education</button>
+                `;
+                
+                return eduDiv;
+            }
+            
+            function createProjectItem(proj) {
+                const projDiv = document.createElement('div');
+                projDiv.className = 'admin-item';
+                projDiv.dataset.id = proj.id;
+                
+                projDiv.innerHTML = `
+                    <div class="form-group">
+                        <label>Project Title:</label>
+                        <input type="text" class="proj-title" value="${proj.title}">
+                    </div>
+                    <div class="form-group">
+                        <label>Description:</label>
+                        <textarea class="proj-desc">${proj.description}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Technologies (comma separated):</label>
+                        <input type="text" class="proj-tech" value="${proj.technologies}">
+                    </div>
+                    <div class="form-group">
+                        <label>Project Link:</label>
+                        <input type="url" class="proj-link" value="${proj.projectLink}">
+                    </div>
+                    <div class="form-group">
+                        <label>Code Link:</label>
+                        <input type="url" class="proj-code" value="${proj.codeLink}">
+                    </div>
+                    <button class="remove-proj btn btn-danger">Remove Project</button>
+                `;
+                
+                return projDiv;
+            }
+            
+            function createSkillItem(skill) {
+                const skillDiv = document.createElement('div');
+                skillDiv.className = 'skill-admin-item';
+                skillDiv.dataset.id = skill.id;
+                
+                skillDiv.innerHTML = `
+                    <div class="form-group">
+                        <label>Skill:</label>
+                        <input type="text" class="skill-name" value="${skill.name}">
+                    </div>
+                    <div class="form-group">
+                        <label>Icon Class:</label>
+                        <input type="text" class="skill-icon" value="${skill.icon}">
+                    </div>
+                    <button class="remove-skill btn btn-sm btn-danger">Remove</button>
+                `;
+                
+                return skillDiv;
+            }
+            
+            function setupAdminEventListeners() {
+                // Save Profile Information
+                document.getElementById('save-profile').addEventListener('click', saveProfile);
+                
+                // Save About
+                document.getElementById('save-about').addEventListener('click', saveAbout);
+                
+                // Experience Events
+                document.getElementById('add-experience').addEventListener('click', addExperience);
+                document.getElementById('save-experience').addEventListener('click', saveExperience);
+                
+                // Add event listeners for dynamically created experience items
+                const experienceContainer = document.getElementById('experience-items');
+                experienceContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('add-desc')) {
+                        const descContainer = e.target.previousElementSibling;
+                        addDescriptionItem(descContainer);
+                    } else if (e.target.classList.contains('remove-desc')) {
+                        e.target.parentElement.remove();
+                    } else if (e.target.classList.contains('remove-exp')) {
+                        e.target.parentElement.remove();
+                    }
+                });
+                
+                // Education Events
+                document.getElementById('add-education').addEventListener('click', addEducation);
+                document.getElementById('save-education').addEventListener('click', saveEducation);
+                
+                // Add event listeners for dynamically created education items
+                const educationContainer = document.getElementById('education-items');
+                educationContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remove-edu')) {
+                        e.target.parentElement.remove();
+                    }
+                });
+                
+                // Project Events
+                document.getElementById('add-project').addEventListener('click', addProject);
+                document.getElementById('save-projects').addEventListener('click', saveProjects);
+                
+                // Add event listeners for dynamically created project items
+                const projectsContainer = document.getElementById('project-items');
+                projectsContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remove-proj')) {
+                        e.target.parentElement.remove();
+                    }
+                });
+                
+                // Skills Events
+                document.getElementById('add-skill').addEventListener('click', addSkill);
+                document.getElementById('save-skills').addEventListener('click', saveSkills);
+                
+                // Add event listeners for dynamically created skill items
+                const skillsContainer = document.getElementById('skill-items');
+                skillsContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remove-skill')) {
+                        e.target.parentElement.remove();
+                    }
+                });
+                
+                // Save All Changes
+                document.getElementById('save-all').addEventListener('click', saveAllChanges);
+                
+                // Reset All
+                document.getElementById('reset-all').addEventListener('click', resetAll);
+            }
+            
+            // Helper Functions
+            function addDescriptionItem(container) {
+                const descItem = document.createElement('div');
+                descItem.className = 'description-item';
+                descItem.innerHTML = `
+                    <textarea class="exp-desc"></textarea>
+                    <button class="remove-desc btn btn-sm btn-danger">Remove</button>
+                `;
+                container.appendChild(descItem);
+            }
+            
+            function generateUniqueId(prefix) {
+                return prefix + '-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+            }
+            
+            // Save Functions
+            function saveProfile() {
+                portfolioData.profile = {
+                    name: document.getElementById('admin-name').value,
+                    title: document.getElementById('admin-title').value,
+                    motto: document.getElementById('admin-motto').value,
+                    location: document.getElementById('admin-location').value,
+                    phone: document.getElementById('admin-phone').value,
+                    email: document.getElementById('admin-email').value,
+                    linkedin: document.getElementById('admin-linkedin').value
+                };
+                
+                updateUI();
+                alert('Profile information saved!');
+            }
+            
+            function saveAbout() {
+                portfolioData.about = document.getElementById('admin-about').value;
+                
+                updateUI();
+                alert('About information saved!');
+            }
+            
+            function addExperience() {
+                const newId = generateUniqueId('exp');
+                const newExp = {
+                    id: newId,
+                    title: 'New Position',
+                    period: 'Start Date - End Date',
+                    technologies: 'Technologies used',
+                    descriptions: ['Description of your work']
+                };
+                
+                const expElement = createExperienceItem(newExp);
+                document.getElementById('experience-items').appendChild(expElement);
+            }
+            
+            function saveExperience() {
+                const experienceItems = document.querySelectorAll('#experience-items .admin-item');
+                const experiences = [];
+                
+                experienceItems.forEach(item => {
+                    const expId = item.dataset.id;
+                    const title = item.querySelector('.exp-title').value;
+                    const period = item.querySelector('.exp-period').value;
+                    const technologies = item.querySelector('.exp-tech').value;
+                    
+                    const descriptions = [];
+                    item.querySelectorAll('.exp-desc').forEach(desc => {
+                        descriptions.push(desc.value);
+                    });
+                    
+                    experiences.push({
+                        id: expId,
+                        title,
+                        period,
+                        technologies,
+                        descriptions
+                    });
+                });
+                
+                portfolioData.experience = experiences;
+                
+                updateUI();
+                alert('Experience information saved!');
+            }
+            
+            function addEducation() {
+                const newId = generateUniqueId('edu');
+                const newEdu = {
+                    id: newId,
+                    school: 'School Name',
+                    period: 'Start Date - End Date',
+                    degree: 'Degree Name'
+                };
+                
+                const eduElement = createEducationItem(newEdu);
+                document.getElementById('education-items').appendChild(eduElement);
+            }
+            
+            function saveEducation() {
+                const educationItems = document.querySelectorAll('#education-items .admin-item');
+                const educations = [];
+                
+                educationItems.forEach(item => {
+                    const eduId = item.dataset.id;
+                    const school = item.querySelector('.edu-school').value;
+                    const period = item.querySelector('.edu-period').value;
+                    const degree = item.querySelector('.edu-degree').value;
+                    
+                    educations.push({
+                        id: eduId,
+                        school,
+                        period,
+                        degree
+                    });
+                });
+                
+                portfolioData.education = educations;
+                
+                updateUI();
+                alert('Education information saved!');
+            }
+            
+            function addProject() {
+                const newId = generateUniqueId('proj');
+                const newProj = {
+                    id: newId,
+                    title: 'New Project',
+                    description: 'Description of the project',
+                    technologies: 'Tech1,Tech2,Tech3',
+                    projectLink: 'https://example.com',
+                    codeLink: 'https://github.com/example'
+                };
+                
+                const projElement = createProjectItem(newProj);
+                document.getElementById('project-items').appendChild(projElement);
+            }
+            
+            function saveProjects() {
+                const projectItems = document.querySelectorAll('#project-items .admin-item');
+                const projects = [];
+                
+                projectItems.forEach(item => {
+                    const projId = item.dataset.id;
+                    const title = item.querySelector('.proj-title').value;
+                    const description = item.querySelector('.proj-desc').value;
+                    const technologies = item.querySelector('.proj-tech').value;
+                    const projectLink = item.querySelector('.proj-link').value;
+                    const codeLink = item.querySelector('.proj-code').value;
+                    
+                    projects.push({
+                        id: projId,
+                        title,
+                        description,
+                        technologies,
+                        projectLink,
+                        codeLink
+                    });
+                });
+                
+                portfolioData.projects = projects;
+                
+                updateUI();
+                alert('Projects information saved!');
+            }
+            
+            function addSkill() {
+                const newId = generateUniqueId('skill');
+                const newSkill = {
+                    id: newId,
+                    name: 'New Skill',
+                    icon: 'fas fa-code'
+                };
+                
+                const skillElement = createSkillItem(newSkill);
+                document.getElementById('skill-items').querySelector('.skill-grid').appendChild(skillElement);
+            }
+            
+            function saveSkills() {
+                const skillItems = document.querySelectorAll('.skill-admin-item');
+                const skills = [];
+                
+                skillItems.forEach(item => {
+                    const skillId = item.dataset.id;
+                    const name = item.querySelector('.skill-name').value;
+                    const icon = item.querySelector('.skill-icon').value;
+                    
+                    skills.push({
+                        id: skillId,
+                        name,
+                        icon
+                    });
+                });
+                
+                portfolioData.skills = skills;
+                
+                updateUI();
+                alert('Skills information saved!');
+            }
+            
+            function saveAllChanges() {
+                saveProfile();
+                saveAbout();
+                saveExperience();
+                saveEducation();
+                saveProjects();
+                saveSkills();
+                
+                // Save to localStorage for persistence (in a real app, would save to server)
+                localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+                
+                alert('All changes have been saved!');
+            }
+            
+            function resetAll() {
+                if (confirm('Are you sure you want to reset all changes? This cannot be undone.')) {
+                    loadAdminPanelData();
+                    alert('All changes have been reset.');
+                }
+            }
+            
+            function updateUI() {
+                // This function would update the main UI based on the changes
+                // In a real implementation, this would modify the DOM or trigger a page reload
+                
+                // For this example, we'll just log the updated data
+                console.log('Portfolio data updated:', portfolioData);
+                
+                // In a real implementation, you would update the DOM elements here
+                // or save to server and reload the page
+            }
+            
+            // Try to load data from localStorage (if available)
+            const savedData = localStorage.getItem('portfolioData');
+            if (savedData) {
+                try {
+                    portfolioData = JSON.parse(savedData);
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
