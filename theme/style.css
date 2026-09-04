@@ -591,11 +591,11 @@ textarea {
     url("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=2000&q=70");
 }
 
-.theme-calendar .showcase-bg {
+.theme-store .showcase-bg {
   background-image:
     linear-gradient(145deg, rgba(18, 46, 52, 0.46), rgba(14, 36, 42, 0.16)),
     radial-gradient(70% 55% at 85% 80%, rgba(240, 210, 76, 0.28), transparent 50%),
-    url("https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=2000&q=70");
+    url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=2000&q=70");
 }
 
 .theme-nasdaq .showcase-bg {
@@ -607,13 +607,6 @@ textarea {
   background:
     linear-gradient(90deg, rgba(8, 20, 26, 0.9) 0%, rgba(8, 20, 26, 0.64) 46%, rgba(8, 20, 26, 0.28) 100%),
     linear-gradient(180deg, rgba(126, 200, 208, 0.08), rgba(8, 20, 26, 0.4));
-}
-
-.theme-micro .showcase-bg {
-  background-image:
-    linear-gradient(145deg, rgba(20, 42, 48, 0.46), rgba(14, 36, 42, 0.16)),
-    radial-gradient(70% 55% at 88% 20%, rgba(240, 210, 76, 0.26), transparent 52%),
-    url("https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?auto=format&fit=crop&w=2000&q=70");
 }
 
 .theme-skills .showcase-bg {
