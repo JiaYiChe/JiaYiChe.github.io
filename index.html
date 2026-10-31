@@ -13,6 +13,7 @@
 </head>
 
 <body id="index" class="home">
+    <div class="sidebar-edge" id="sidebarEdge" aria-hidden="true"></div>
     <div class="site-shell">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
@@ -22,7 +23,7 @@
                 </div>
                 <div class="sidebar-identity">
                     <h1>JiaYi Che</h1>
-                    <p class="role">Junior Software Engineer</p>
+                    <p class="role">Software Developer</p>
                     <p class="location"><i class="fas fa-map-marker-alt"></i> Windsor, ON</p>
                 </div>
             </div>
@@ -75,9 +76,9 @@
                 <div class="showcase-bg"></div>
                 <div class="showcase-inner">
                     <p class="kicker">Profile</p>
-                    <h2>Junior software engineer with a focus on backend and full-stack work.</h2>
-                    <p class="showcase-lead">I recently completed a Master of Engineering in Software Engineering at Western University (GPA 3.9 / 4.0), after a BSc in Computing Science at the University of Alberta.</p>
-                    <p class="showcase-lead">Most of my experience so far comes from co-ops and course projects — APIs, web apps, and data work in Java, Python, C#, and JavaScript.</p>
+                    <h2>Software developer focused on backend systems, full-stack web applications, and data pipelines.</h2>
+                    <p class="showcase-lead">M.Eng. in Software Engineering, Western University (GPA 3.9 / 4.0). BSc in Computing Science, University of Alberta. Canadian Permanent Resident — no sponsorship required.</p>
+                    <p class="showcase-lead">Background in C#/.NET backend services with gRPC and async messaging, Spring Boot REST APIs, full-stack development with React and TypeScript, and cloud deployment on AWS with Docker and Kubernetes.</p>
                 </div>
             </article>
 
@@ -85,22 +86,23 @@
                 <div class="showcase-bg"></div>
                 <div class="showcase-inner">
                     <p class="kicker">Work Experience</p>
-                    <h2>Machine Vision Engineer (Co-op)</h2>
+                    <h2>Software Developer (Co-op)</h2>
                     <p class="showcase-meta">Vista Solution Inc. · Windsor, ON</p>
                     <span class="showcase-period">Sep 2025 — Apr 2026</span>
-                    <p class="showcase-lead">Machine-vision telemetry, gRPC services, and a live PLC dashboard for production hardware.</p>
+                    <p class="showcase-lead">C#/.NET backend services, gRPC / Protobuf data pipelines, and a real-time WPF dashboard for industrial hardware.</p>
                     <ul class="showcase-copy">
-                        <li>Built C#/.NET pipelines and gRPC APIs for machine-vision telemetry, bringing end-to-end message latency down to 2&nbsp;ms.</li>
-                        <li>Tested compiled vision software on the target hardware. C and C# modules removed redundant data copies, which improved processing speed by 35%.</li>
-                        <li>Built a WPF dashboard that shows live PLC status and binary streams, updating the UI every 20&nbsp;ms.</li>
-                        <li>Looked into production defects across 12,000 daily events and traced the root causes so the system stayed reliable.</li>
-                        <li>Documented six internal APIs — how to use them, how they fail, and what they depend on — and reviewed teammates' code.</li>
+                        <li>Built C#/.NET backend services connecting industrial PLCs with analytics systems, routing binary data streams over gRPC and Protobuf.</li>
+                        <li>Designed asynchronous concurrent message queues to decouple the high-frequency data pipeline from a WPF real-time dashboard, reducing end-to-end latency to 2&nbsp;ms with a UI refresh rate of 20&nbsp;ms.</li>
+                        <li>Investigated production failures across 12,000 daily events, performing root cause analysis to fix backend memory and concurrency bottlenecks.</li>
+                        <li>Wrote technical specifications for 6 internal APIs and configured the backend program as a Windows Service for stable deployment.</li>
                     </ul>
                     <div class="tech-row">
                         <span>C# / .NET</span>
                         <span>gRPC</span>
+                        <span>Protobuf</span>
                         <span>WPF</span>
-                        <span>PLC</span>
+                        <span>Async Queues</span>
+                        <span>Windows Service</span>
                         <span>C</span>
                     </div>
                 </div>
@@ -113,20 +115,23 @@
                     <h2>Full Stack Developer (Co-op)</h2>
                     <p class="showcase-meta">UAlberta CSL · Edmonton, AB</p>
                     <span class="showcase-period">Sep 2022 — Dec 2022</span>
-                    <p class="showcase-lead">Backend-focused web apps, relational schemas, and high-coverage tests for academic research.</p>
+                    <p class="showcase-lead">Full-stack web applications, REST APIs, cloud deployment, and automated testing for academic research teams.</p>
                     <ul class="showcase-copy">
-                        <li>Built web apps with a backend focus in Java, Spring Boot, and React, and designed relational schemas for research projects.</li>
-                        <li>Designed REST APIs in Spring Boot and Node.js/Express to connect third-party services and move data between systems.</li>
-                        <li>Wrote and tuned SQL queries and indexes, cutting query time by 80%.</li>
-                        <li>Added 150 unit and integration tests in a large existing codebase, raising coverage to 90%, and took part in code reviews.</li>
+                        <li>Built full-stack web applications and REST APIs in Java (Spring Boot), TypeScript (React), and Node.js for academic research teams.</li>
+                        <li>Refactored PostgreSQL and MongoDB schemas with optimized SQL queries, reducing query execution time by 80%.</li>
+                        <li>Deployed containerized services on AWS (EC2) Linux servers using Docker, Kubernetes, and CI/CD pipelines.</li>
+                        <li>Wrote 150 automated unit and integration tests using JUnit, raising coverage to 90%, and managed all versions with Git.</li>
                     </ul>
                     <div class="tech-row">
                         <span>Java</span>
                         <span>Spring Boot</span>
+                        <span>TypeScript</span>
                         <span>React</span>
                         <span>Node.js</span>
-                        <span>Express</span>
-                        <span>SQL</span>
+                        <span>PostgreSQL</span>
+                        <span>Docker</span>
+                        <span>Kubernetes</span>
+                        <span>AWS</span>
                     </div>
                 </div>
             </article>
@@ -154,67 +159,17 @@
                 </div>
             </article>
 
-            <article id="projects" class="showcase theme-nasdaq" data-nav="projects">
+            <article id="projects" class="showcase theme-social" data-nav="projects">
                 <div class="showcase-bg"></div>
-                <div class="showcase-inner">
-                    <p class="kicker">Project</p>
-                    <h2>NASDAQ Index Forecasting Model</h2>
-                    <p class="showcase-lead">A time-series model that asks: will the next trading session's return be above +1%?</p>
-                    <ul class="showcase-copy">
-                        <li>Merged NASDAQ-100 daily prices with 11 U.S. macroeconomic series, then built 36 features for the model.</li>
-                        <li>Trained a 1D convolutional network with max pooling and a GRU. Data was split in time order, with no shuffling, so later days never leaked into training.</li>
-                        <li>First author and integration owner on a five-person team: 23 of 31 commits. Also reviewed and merged six teammate pull requests.</li>
-                    </ul>
-                    <div class="tech-row">
-                        <span>Python</span>
-                        <span>TensorFlow</span>
-                        <span>Pandas</span>
-                        <span>Scikit-Learn</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/JiaYiChe" target="_blank" rel="noopener">View project</a>
-                        <a href="https://github.com/JiaYiChe" target="_blank" rel="noopener">View code</a>
-                    </div>
-                </div>
-            </article>
-
-            <article id="project-store" class="showcase theme-store" data-nav="projects">
-                <div class="showcase-bg"></div>
-                <div class="showcase-inner">
-                    <p class="kicker">Project</p>
-                    <h2>Online Computer Store</h2>
-                    <p class="showcase-lead">ECE9065 course project: a simulated online computer store with login, cart, checkout, and admin inventory.</p>
-                    <ul class="showcase-copy">
-                        <li>Main committer on a three-person team (36 of 39 git commits).</li>
-                        <li>Added session login, Google OAuth, catalog search and filters, a shopping cart, simulated checkout, PDF receipts by email, and an admin inventory screen.</li>
-                        <li>Stored users, stock, carts, and receipts in MongoDB. One Express process served both the website pages and the REST APIs, including reviews and image uploads.</li>
-                    </ul>
-                    <div class="tech-row">
-                        <span>Node.js</span>
-                        <span>Express</span>
-                        <span>MongoDB</span>
-                        <span>HTML / CSS</span>
-                        <span>JavaScript</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/JiaYiChe" target="_blank" rel="noopener">View project</a>
-                        <a href="https://github.com/JiaYiChe" target="_blank" rel="noopener">View code</a>
-                    </div>
-                </div>
-            </article>
-
-            <article id="project-social" class="showcase theme-social" data-nav="projects">
-                <div class="showcase-bg"></div>
-                <div class="showcase-inner">
+                <div class="showcase-inner social-layout">
+                    <div class="showcase-copy-col">
                     <p class="kicker">Project</p>
                     <h2>Distributed Social Networking System</h2>
-                    <p class="showcase-lead">A federated social platform. Each node keeps its own data and talks to other nodes over a shared REST/JSON API.</p>
+                    <p class="showcase-lead">A federated social platform where independent nodes communicate over a shared REST/JSON API contract rather than a shared database.</p>
                     <ul class="showcase-copy">
-                        <li>Designed the federation setup: independent nodes talk over REST/JSON instead of sharing one database.</li>
-                        <li>Each author has an inbox for posts, follows, likes, and comments. Authors from other nodes are saved locally, and duplicate posts, likes, and follows are ignored.</li>
-                        <li>Stored HTTP Basic credentials for other nodes in a registry, so only registered partner nodes can deliver into a user's inbox.</li>
-                        <li>Connected live with two other teams' independent apps, and found a pagination bug that was cutting off posts from other nodes' feeds.</li>
-                        <li>Largest contributor on a five-person team (about 135 of 408 commits). Owned the REST API layer and the work that connected the nodes.</li>
+                        <li>Built the federation layer: each node hosts per-author inboxes for posts, follows, likes, and comments, with deduplication and HTTP Basic auth for partner nodes.</li>
+                        <li>Diagnosed and fixed a JSON pagination format mismatch during cross-team integration tests with 2 external engineering teams.</li>
+                        <li>Owned the REST API layer and cross-node message routing as the primary contributor on a five-person team.</li>
                     </ul>
                     <div class="tech-row">
                         <span>Python</span>
@@ -226,9 +181,95 @@
                         <span>Heroku</span>
                         <span>Vercel</span>
                     </div>
-                    <div class="project-links">
-                        <a href="https://github.com/JiaYiChe" target="_blank" rel="noopener">View project</a>
-                        <a href="https://github.com/JiaYiChe" target="_blank" rel="noopener">View code</a>
+                    </div>
+                    <div class="project-media">
+                        <div class="project-video" data-youtube="68tMtPkuGQQ">
+                            <video id="socialDemoVideo" controls playsinline preload="metadata" poster="theme/img/social/swagger-docs.png">
+                                <source src="theme/img/social/demo.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <p class="video-fallback-link"><a href="https://youtu.be/68tMtPkuGQQ" target="_blank" rel="noopener">Watch on YouTube</a></p>
+                        <div class="project-shots-wrap">
+                            <button type="button" class="shot-nav shot-prev" aria-label="Previous screenshot"><i class="fas fa-chevron-left"></i></button>
+                            <div class="project-shots" id="socialShots">
+                                <a href="theme/img/social/django-admin.png" target="_blank" rel="noopener">
+                                    <figure>
+                                        <img src="theme/img/social/django-admin.png" alt="Django admin for authors, posts, follows, likes, and inboxes">
+                                        <figcaption>Django admin</figcaption>
+                                    </figure>
+                                </a>
+                                <a href="theme/img/social/swagger-docs.png" target="_blank" rel="noopener">
+                                    <figure>
+                                        <img src="theme/img/social/swagger-docs.png" alt="CMPUT 404 project API documentation">
+                                        <figcaption>API documentation</figcaption>
+                                    </figure>
+                                </a>
+                                <a href="theme/img/social/swagger-endpoints.png" target="_blank" rel="noopener">
+                                    <figure>
+                                        <img src="theme/img/social/swagger-endpoints.png" alt="Swagger list of post and author service endpoints">
+                                        <figcaption>REST endpoints</figcaption>
+                                    </figure>
+                                </a>
+                                <a href="theme/img/social/swagger-signin.png" target="_blank" rel="noopener">
+                                    <figure>
+                                        <img src="theme/img/social/swagger-signin.png" alt="Swagger sign-in endpoint">
+                                        <figcaption>Sign in</figcaption>
+                                    </figure>
+                                </a>
+                                <a href="theme/img/social/swagger-like.png" target="_blank" rel="noopener">
+                                    <figure>
+                                        <img src="theme/img/social/swagger-like.png" alt="Swagger create-like endpoint">
+                                        <figcaption>Like a post</figcaption>
+                                    </figure>
+                                </a>
+                                <a href="theme/img/social/swagger-post-delete.png" target="_blank" rel="noopener">
+                                    <figure>
+                                        <img src="theme/img/social/swagger-post-delete.png" alt="Swagger update and delete post endpoints">
+                                        <figcaption>Update and delete posts</figcaption>
+                                    </figure>
+                                </a>
+                            </div>
+                            <button type="button" class="shot-nav shot-next" aria-label="Next screenshot"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article id="project-nasdaq" class="showcase theme-nasdaq" data-nav="projects">
+                <div class="showcase-bg"></div>
+                <div class="showcase-inner">
+                    <p class="kicker">Project</p>
+                    <h2>NASDAQ Index Forecasting Model</h2>
+                    <p class="showcase-lead">A time-series deep learning model that predicts whether the next trading session's return will exceed +1%.</p>
+                    <ul class="showcase-copy">
+                        <li>Built a data pipeline merging NASDAQ-100 daily prices with 11 US macroeconomic series and engineering 36 technical and lag features.</li>
+                        <li>Trained a Conv1D + MaxPooling1D + GRU model in TensorFlow with chronological train-test splits to prevent data leakage and used class-weight balancing to handle imbalanced labels.</li>
+                    </ul>
+                    <div class="tech-row">
+                        <span>Python</span>
+                        <span>TensorFlow</span>
+                        <span>Pandas</span>
+                        <span>Scikit-Learn</span>
+                    </div>
+                </div>
+            </article>
+
+            <article id="project-store" class="showcase theme-store" data-nav="projects">
+                <div class="showcase-bg"></div>
+                <div class="showcase-inner">
+                    <p class="kicker">Project</p>
+                    <h2>Online Computer Store</h2>
+                    <p class="showcase-lead">A simulated online computer store built with Node.js and Express, featuring auth, cart, checkout, and admin inventory.</p>
+                    <ul class="showcase-copy">
+                        <li>Built the application as the primary committer on a three-person team (36 of 39 git commits), implementing session login, Google OAuth, catalog search and filters, cart, simulated checkout, PDF receipts, and an admin inventory screen.</li>
+                        <li>Modeled users, inventory, carts, and receipts in MongoDB; a single Express process served both web pages and REST APIs, including third-party reviews and image uploads.</li>
+                    </ul>
+                    <div class="tech-row">
+                        <span>Node.js</span>
+                        <span>Express</span>
+                        <span>MongoDB</span>
+                        <span>HTML / CSS</span>
+                        <span>JavaScript</span>
                     </div>
                 </div>
             </article>
@@ -237,95 +278,226 @@
                 <div class="showcase-bg"></div>
                 <div class="showcase-inner">
                     <p class="kicker">Capabilities</p>
-                    <h2>A practical stack from co-ops and coursework.</h2>
+                    <h2>A full-stack technical foundation across backend, cloud, and data.</h2>
                     <div class="skill-groups">
                         <div class="skill-group">
                             <h3>Languages</h3>
                             <div class="skill-group-list">
                                 <span class="skill-chip">Java</span>
-                                <span class="skill-chip">Python</span>
                                 <span class="skill-chip">C#</span>
-                                <span class="skill-chip">JavaScript</span>
+                                <span class="skill-chip">Python</span>
+                                <span class="skill-chip">TypeScript</span>
+                                <span class="skill-chip">JavaScript (ES6+)</span>
                                 <span class="skill-chip">SQL</span>
-                                <span class="skill-chip">C</span>
-                            </div>
-                        </div>
-                        <div class="skill-group">
-                            <h3>Backend &amp; APIs</h3>
-                            <div class="skill-group-list">
-                                <span class="skill-chip">Spring Boot</span>
-                                <span class="skill-chip">Django</span>
-                                <span class="skill-chip">Django REST Framework</span>
-                                <span class="skill-chip">.NET</span>
-                                <span class="skill-chip">REST</span>
-                                <span class="skill-chip">gRPC / Protobuf</span>
-                                <span class="skill-chip">Node.js</span>
-                            </div>
-                        </div>
-                        <div class="skill-group">
-                            <h3>Frontend</h3>
-                            <div class="skill-group-list">
-                                <span class="skill-chip">React</span>
+                                <span class="skill-chip">C / C++</span>
                                 <span class="skill-chip">HTML5</span>
                                 <span class="skill-chip">CSS</span>
                             </div>
                         </div>
                         <div class="skill-group">
-                            <h3>Data</h3>
+                            <h3>Backend &amp; Architecture</h3>
                             <div class="skill-group-list">
-                                <span class="skill-chip">PostgreSQL</span>
-                                <span class="skill-chip">MongoDB</span>
-                                <span class="skill-chip">Pandas</span>
-                                <span class="skill-chip">Query optimization &amp; indexing</span>
+                                <span class="skill-chip">.NET</span>
+                                <span class="skill-chip">Spring Boot</span>
+                                <span class="skill-chip">Node.js</span>
+                                <span class="skill-chip">Express</span>
+                                <span class="skill-chip">Django</span>
+                                <span class="skill-chip">gRPC</span>
+                                <span class="skill-chip">Protobuf</span>
+                                <span class="skill-chip">REST APIs</span>
+                                <span class="skill-chip">Async Message Queues</span>
+                                <span class="skill-chip">Concurrent Programming</span>
                             </div>
                         </div>
                         <div class="skill-group">
-                            <h3>Cloud &amp; Tooling</h3>
+                            <h3>Frontend &amp; UI</h3>
+                            <div class="skill-group-list">
+                                <span class="skill-chip">React</span>
+                                <span class="skill-chip">Next.js</span>
+                                <span class="skill-chip">WPF / XAML</span>
+                            </div>
+                        </div>
+                        <div class="skill-group">
+                            <h3>Databases</h3>
+                            <div class="skill-group-list">
+                                <span class="skill-chip">PostgreSQL</span>
+                                <span class="skill-chip">MongoDB</span>
+                                <span class="skill-chip">MySQL</span>
+                            </div>
+                        </div>
+                        <div class="skill-group">
+                            <h3>Cloud &amp; DevOps</h3>
                             <div class="skill-group-list">
                                 <span class="skill-chip">AWS (EC2)</span>
                                 <span class="skill-chip">Docker</span>
                                 <span class="skill-chip">Kubernetes</span>
+                                <span class="skill-chip">CI/CD Pipelines</span>
                                 <span class="skill-chip">Linux</span>
                                 <span class="skill-chip">Git</span>
-                                <span class="skill-chip">Agile / Scrum</span>
-                                <span class="skill-chip">Jira</span>
-                                <span class="skill-chip">Unit &amp; integration testing</span>
                             </div>
                         </div>
                         <div class="skill-group">
-                            <h3>AI</h3>
+                            <h3>Data, AI &amp; Testing</h3>
                             <div class="skill-group-list">
-                                <span class="skill-chip">GitHub Copilot</span>
+                                <span class="skill-chip">TensorFlow</span>
+                                <span class="skill-chip">Pandas</span>
+                                <span class="skill-chip">Scikit-Learn</span>
+                                <span class="skill-chip">NumPy</span>
+                                <span class="skill-chip">JUnit</span>
                                 <span class="skill-chip">Claude Code</span>
-                                <span class="skill-chip">Prompt engineering</span>
-                                <span class="skill-chip">Responsible AI principles</span>
+                                <span class="skill-chip">GitHub Copilot</span>
+                                <span class="skill-chip">Cursor</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </article>
 
-            <footer class="site-end">JiaYi Che · Junior Software Engineer · Windsor, ON</footer>
+            <footer class="site-end">JiaYi Che · Software Developer · Windsor, ON</footer>
         </main>
+        <div class="page-dots" id="pageDots" aria-hidden="true"></div>
+        <div class="auto-toast" id="autoToast" aria-live="polite"></div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
+            const sidebarEdge = document.getElementById('sidebarEdge');
             const navToggle = document.getElementById('navToggle');
             const navLinks = document.querySelectorAll('.site-nav a');
+            const stream = document.querySelector('.content-stream');
+            const pages = Array.prototype.slice.call(document.querySelectorAll('.showcase, .site-end'));
             const sections = document.querySelectorAll('.showcase[data-nav]');
+            const dotsWrap = document.getElementById('pageDots');
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const CHAR_MS = 16;
+            let hideTimer = null;
+            let pageLock = false;
+            let currentPage = 0;
+            const revealTimers = new WeakMap();
+
+            /* ── autoplay toast ── */
+            const autoToast = document.getElementById('autoToast');
+            let toastTimer = null;
+            function showAutoToast(msg) {
+                if (!autoToast) return;
+                clearTimeout(toastTimer);
+                autoToast.textContent = msg;
+                autoToast.classList.remove('is-out');
+                autoToast.classList.add('is-on');
+                toastTimer = setTimeout(function() {
+                    autoToast.classList.add('is-out');
+                    toastTimer = setTimeout(function() {
+                        autoToast.classList.remove('is-on', 'is-out');
+                    }, 400);
+                }, 1600);
+            }
+
+            /* ── autoplay ── */
+            let autoTimer = null;
+            let autoActive = !reduceMotion;
+
+            function stopAuto() {
+                if (!autoActive) return;
+                autoActive = false;
+                clearTimeout(autoTimer);
+                showAutoToast('Autoplay OFF');
+            }
+
+            function scheduleNext() {
+                if (!autoActive) return;
+                const page = pages[currentPage];
+                const charCount = page ? (page.textContent || '').trim().length : 60;
+                const readMs = Math.max(2200, Math.min(9000, charCount * 28));
+                autoTimer = setTimeout(function() {
+                    if (!autoActive) return;
+                    if (currentPage < pages.length - 1) {
+                        goToPage(currentPage + 1);
+                        scheduleNext();
+                    } else {
+                        autoActive = false;
+                        showAutoToast('Autoplay OFF');
+                    }
+                }, readMs);
+            }
+
+            /* stop on any user intent */
+            ['wheel', 'pointerdown', 'touchstart', 'keydown'].forEach(function(evt) {
+                document.addEventListener(evt, stopAuto, { once: true, passive: true });
+            });
+
+            function isDeck() {
+                return window.matchMedia('(min-width: 861px)').matches;
+            }
+
+            function showSidebar() {
+                clearTimeout(hideTimer);
+                sidebar.classList.add('is-visible');
+                document.body.classList.add('sidebar-open');
+            }
+
+            function hideSidebar() {
+                hideTimer = setTimeout(function() {
+                    sidebar.classList.remove('is-visible');
+                    document.body.classList.remove('sidebar-open');
+                }, 220);
+            }
+
+            if (sidebarEdge) {
+                sidebarEdge.addEventListener('mouseenter', showSidebar);
+            }
+            sidebar.addEventListener('mouseenter', showSidebar);
+            sidebar.addEventListener('mouseleave', function() {
+                if (isDeck()) hideSidebar();
+            });
+            document.addEventListener('mousemove', function(e) {
+                if (!isDeck()) return;
+                if (e.clientX <= 18) showSidebar();
+            });
+
+            function goToPage(index) {
+                const next = Math.max(0, Math.min(pages.length - 1, index));
+                currentPage = next;
+                pages[next].scrollIntoView({
+                    behavior: 'smooth',
+                    inline: 'start',
+                    block: 'nearest'
+                });
+                updateDots();
+            }
+
+            function updateDots() {
+                if (!dotsWrap) return;
+                const buttons = dotsWrap.querySelectorAll('button');
+                buttons.forEach(function(btn, i) {
+                    btn.classList.toggle('is-active', i === currentPage);
+                });
+            }
+
+            if (dotsWrap) {
+                pages.forEach(function(_, i) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.setAttribute('aria-label', 'Go to page ' + (i + 1));
+                    btn.addEventListener('click', function() { goToPage(i); });
+                    dotsWrap.appendChild(btn);
+                });
+            }
 
             if (window.location.hash) {
                 const initial = document.querySelector(window.location.hash);
                 if (initial) {
-                    initial.scrollIntoView({ behavior: 'auto', block: 'start' });
+                    const idx = pages.indexOf(initial);
+                    if (idx >= 0) currentPage = idx;
+                    initial.scrollIntoView({ behavior: 'auto', inline: 'start', block: 'nearest' });
                 }
             }
+            updateDots();
 
             if (navToggle) {
                 navToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('is-open');
+                    sidebar.classList.toggle('is-visible');
                 });
             }
 
@@ -335,24 +507,188 @@
                     const targetElement = document.querySelector(targetId);
                     if (!targetElement) return;
                     e.preventDefault();
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const idx = pages.indexOf(targetElement);
+                    if (idx >= 0) goToPage(idx);
+                    else targetElement.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
                     sidebar.classList.remove('is-open');
+                    if (isDeck()) hideSidebar();
                 });
             });
+
+            if (stream) {
+                stream.addEventListener('wheel', function(e) {
+                    if (!isDeck()) return;
+                    if (Math.abs(e.deltaY) < 8 && Math.abs(e.deltaX) < 8) return;
+                    e.preventDefault();
+                    if (pageLock) return;
+                    pageLock = true;
+                    const dir = (e.deltaY + e.deltaX) > 0 ? 1 : -1;
+                    goToPage(currentPage + dir);
+                    setTimeout(function() { pageLock = false; }, 720);
+                }, { passive: false });
+            }
+
+            /* kick off autoplay after first reveal animation settles */
+            /* (scheduleNext is launched below together with the ON toast) */
+
+            document.addEventListener('keydown', function(e) {
+                if (!isDeck()) return;
+                if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                    e.preventDefault();
+                    goToPage(currentPage + 1);
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                    e.preventDefault();
+                    goToPage(currentPage - 1);
+                }
+            });
+
+            function wrapWords(el) {
+                if (el.dataset.prepared === '1') return;
+                const text = el.textContent;
+                el.textContent = '';
+                text.split(/(\s+)/).forEach(function(part) {
+                    if (!part) return;
+                    if (/^\s+$/.test(part)) {
+                        el.appendChild(document.createTextNode(part));
+                        return;
+                    }
+                    const span = document.createElement('span');
+                    span.className = 'word';
+                    span.textContent = part;
+                    el.appendChild(span);
+                });
+                el.dataset.prepared = '1';
+            }
+
+            function clearRevealTimers(section) {
+                const list = revealTimers.get(section) || [];
+                list.forEach(clearTimeout);
+                revealTimers.set(section, []);
+            }
+
+            function resetReveal(section) {
+                clearRevealTimers(section);
+                section.querySelectorAll('.word, .reveal-block').forEach(function(el) {
+                    el.classList.remove('is-on');
+                });
+                section.classList.remove('is-revealed');
+            }
+
+            document.querySelectorAll('.showcase').forEach(function(section) {
+                section.querySelectorAll('h2, .showcase-lead, .showcase-copy li, .showcase-meta').forEach(wrapWords);
+                section.querySelectorAll('.kicker, .showcase-period, .tech-row, .skill-group, .project-media').forEach(function(el) {
+                    el.classList.add('reveal-block');
+                });
+            });
+
+            function revealSection(section) {
+                if (section.classList.contains('is-revealed')) return;
+                section.classList.add('is-revealed');
+
+                const sequence = [];
+                const blocks = section.querySelectorAll('.kicker, h2, .showcase-meta, .showcase-period, .showcase-lead, .showcase-copy li, .tech-row, .skill-group, .project-media');
+                blocks.forEach(function(block) {
+                    const words = block.matches('h2, .showcase-lead, .showcase-copy li, .showcase-meta')
+                        ? Array.prototype.slice.call(block.querySelectorAll('.word'))
+                        : [];
+                    if (words.length) {
+                        words.forEach(function(word) { sequence.push(word); });
+                    } else {
+                        block.classList.add('reveal-block');
+                        sequence.push(block);
+                    }
+                });
+
+                if (reduceMotion) {
+                    sequence.forEach(function(el) { el.classList.add('is-on'); });
+                    return;
+                }
+
+                let delay = 80;
+                sequence.forEach(function(el) {
+                    const len = (el.textContent || '').trim().length || 8;
+                    const hold = Math.max(40, Math.min(220, len * CHAR_MS));
+                    const timer = setTimeout(function() {
+                        el.classList.add('is-on');
+                    }, delay);
+                    const list = revealTimers.get(section) || [];
+                    list.push(timer);
+                    revealTimers.set(section, list);
+                    delay += hold;
+                });
+            }
 
             const observer = new IntersectionObserver(function(entries) {
                 entries.forEach(function(entry) {
-                    if (!entry.isIntersecting) return;
-                    const navId = entry.target.getAttribute('data-nav');
-                    navLinks.forEach(function(link) {
-                        link.classList.toggle('active', link.getAttribute('href') === '#' + navId);
-                    });
+                    if (!entry.isIntersecting) {
+                        if (entry.target.classList.contains('showcase')) {
+                            resetReveal(entry.target);
+                        }
+                        return;
+                    }
+                    const page = entry.target;
+                    const idx = pages.indexOf(page);
+                    if (idx >= 0) {
+                        currentPage = idx;
+                        updateDots();
+                    }
+                    const navId = page.getAttribute('data-nav');
+                    if (navId) {
+                        navLinks.forEach(function(link) {
+                            link.classList.toggle('active', link.getAttribute('href') === '#' + navId);
+                        });
+                    }
+                    if (page.classList.contains('showcase')) {
+                        revealSection(page);
+                    }
                 });
-            }, { rootMargin: '-35% 0px -50% 0px', threshold: 0.01 });
-
-            sections.forEach(function(section) {
-                observer.observe(section);
+            }, {
+                root: isDeck() ? stream : null,
+                threshold: 0.45
             });
+
+            pages.forEach(function(page) {
+                observer.observe(page);
+            });
+
+            const demoVideo = document.getElementById('socialDemoVideo');
+            const demoWrap = document.querySelector('.project-video');
+            function showYouTubeFallback() {
+                if (!demoWrap || demoWrap.dataset.fallback === '1') return;
+                demoWrap.dataset.fallback = '1';
+                const id = demoWrap.getAttribute('data-youtube');
+                demoWrap.innerHTML = '<iframe src="https://www.youtube.com/embed/' + id + '" title="Distributed Social Network demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+            }
+            if (demoVideo && demoWrap) {
+                demoVideo.addEventListener('error', showYouTubeFallback);
+                const source = demoVideo.querySelector('source');
+                if (source) source.addEventListener('error', showYouTubeFallback);
+            }
+
+            const shots = document.getElementById('socialShots');
+            const prevShot = document.querySelector('.shot-prev');
+            const nextShot = document.querySelector('.shot-next');
+            function scrollShots(dir) {
+                if (!shots) return;
+                const card = shots.querySelector('a');
+                const step = card ? card.getBoundingClientRect().width + 12 : 280;
+                shots.scrollBy({ left: dir * step, behavior: 'smooth' });
+            }
+            if (prevShot) prevShot.addEventListener('click', function() { scrollShots(-1); });
+            if (nextShot) nextShot.addEventListener('click', function() { scrollShots(1); });
+            if (shots) {
+                shots.addEventListener('wheel', function(e) {
+                    e.stopPropagation();
+                });
+            }
+
+            /* kick off autoplay and show initial toast */
+            if (autoActive) {
+                setTimeout(function() {
+                    showAutoToast('Autoplay ON');
+                    scheduleNext();
+                }, 800);
+            }
         });
     </script>
 </body>
