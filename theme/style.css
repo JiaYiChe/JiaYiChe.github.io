@@ -1262,6 +1262,21 @@ body.sidebar-open .sidebar-edge::after {
   width: 100%;
   border: none;
   background: #070b12;
+  transition: opacity 0.25s ease;
+}
+.dash-modal-loading {
+  position: absolute;
+  inset: 42px 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #070b12;
+  color: rgba(247, 255, 249, 0.4);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
 }
 body.modal-open .content-stream {
   pointer-events: none;

@@ -373,7 +373,8 @@
                         <button class="dash-modal-close" id="closeDashboard" type="button" aria-label="Close dashboard">&#10005;</button>
                     </div>
                 </div>
-                <iframe class="dash-modal-frame" id="dashFrame" src="" title="NASDAQ Project Dashboard" loading="lazy"></iframe>
+                <div class="dash-modal-loading" id="dashLoading">Loading dashboard…</div>
+                <iframe class="dash-modal-frame" id="dashFrame" title="NASDAQ Project Dashboard"></iframe>
             </div>
         </div>
     </div>
@@ -702,12 +703,21 @@
             }
 
             /* ── dashboard modal ── */
-            const dashModal = document.getElementById('dashModal');
-            const dashFrame = document.getElementById('dashFrame');
-            const openDash  = document.getElementById('openDashboard');
-            const closeDash = document.getElementById('closeDashboard');
+            const dashModal   = document.getElementById('dashModal');
+            const dashFrame   = document.getElementById('dashFrame');
+            const dashLoading = document.getElementById('dashLoading');
+            const openDash    = document.getElementById('openDashboard');
+            const closeDash   = document.getElementById('closeDashboard');
+            if (dashFrame && dashLoading) {
+                dashFrame.addEventListener('load', function() {
+                    dashLoading.style.display = 'none';
+                    dashFrame.style.opacity   = '1';
+                });
+            }
             function openDashboard() {
-                if (!dashFrame.src || dashFrame.src === window.location.href) {
+                if (!dashFrame.getAttribute('src')) {
+                    if (dashLoading) { dashLoading.style.display = 'flex'; }
+                    dashFrame.style.opacity = '0';
                     dashFrame.src = 'dashboard/index.html';
                 }
                 dashModal.classList.add('is-open');
