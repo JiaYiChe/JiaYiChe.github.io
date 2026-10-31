@@ -251,6 +251,11 @@
                         <span>Pandas</span>
                         <span>Scikit-Learn</span>
                     </div>
+                    <button class="dashboard-trigger" id="openDashboard" type="button">
+                        <span class="dashboard-trigger-icon">&#9654;</span>
+                        <span>View Project Dashboard</span>
+                        <span class="dashboard-trigger-badge">Interactive</span>
+                    </button>
                 </div>
             </article>
 
@@ -357,6 +362,20 @@
         </main>
         <div class="page-dots" id="pageDots" aria-hidden="true"></div>
         <div class="auto-toast" id="autoToast" aria-live="polite"></div>
+
+        <!-- Dashboard preview modal -->
+        <div class="dash-modal" id="dashModal" role="dialog" aria-modal="true" aria-label="NASDAQ Project Dashboard">
+            <div class="dash-modal-chrome">
+                <div class="dash-modal-bar">
+                    <span class="dash-modal-title">NASDAQ Next-Session Move Classifier · ECE9063</span>
+                    <div class="dash-modal-actions">
+                        <a class="dash-modal-open" href="dashboard/index.html" target="_blank" rel="noopener" title="Open in new tab">&#8599;</a>
+                        <button class="dash-modal-close" id="closeDashboard" type="button" aria-label="Close dashboard">&#10005;</button>
+                    </div>
+                </div>
+                <iframe class="dash-modal-frame" id="dashFrame" src="" title="NASDAQ Project Dashboard" loading="lazy"></iframe>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -681,6 +700,32 @@
                     e.stopPropagation();
                 });
             }
+
+            /* ── dashboard modal ── */
+            const dashModal = document.getElementById('dashModal');
+            const dashFrame = document.getElementById('dashFrame');
+            const openDash  = document.getElementById('openDashboard');
+            const closeDash = document.getElementById('closeDashboard');
+            function openDashboard() {
+                if (!dashFrame.src || dashFrame.src === window.location.href) {
+                    dashFrame.src = 'dashboard/index.html';
+                }
+                dashModal.classList.add('is-open');
+                document.body.classList.add('modal-open');
+                stopAuto();
+            }
+            function closeDashboard() {
+                dashModal.classList.remove('is-open');
+                document.body.classList.remove('modal-open');
+            }
+            if (openDash)  openDash.addEventListener('click', openDashboard);
+            if (closeDash) closeDash.addEventListener('click', closeDashboard);
+            dashModal && dashModal.addEventListener('click', function(e) {
+                if (e.target === dashModal) closeDashboard();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && dashModal && dashModal.classList.contains('is-open')) closeDashboard();
+            });
 
             /* kick off autoplay and show initial toast */
             if (autoActive) {

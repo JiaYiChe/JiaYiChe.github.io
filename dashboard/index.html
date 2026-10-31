@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NASDAQ Next-Session Move Classifier · ECE9063</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <div class="brand">
+        <div class="kicker">Western University · ECE9063 · Fall 2024</div>
+        <h1>NASDAQ Next-Session Move Classifier <span>· ECE9063</span></h1>
+      </div>
+      <p class="lede">
+        Chronological evaluation of a Conv1D + GRU classifier for
+        <strong>next-session return &gt; +1%</strong> — not a trading system,
+        and not an accuracy trophy.
+      </p>
+      <div class="source-key" aria-label="Number sources">
+        <span class="pill live">Live from CSV</span>
+        <span class="pill report">Report Table I / II</span>
+        <span class="pill derived">CM backsolved</span>
+      </div>
+    </header>
+
+    <section class="pipeline" id="crop-pipeline" aria-label="Project pipeline">
+      <article class="step">
+        <div class="step-num">01</div>
+        <h2>Data merge</h2>
+        <p>NASDAQ-100 daily bars inner-joined with 11 US macro series, 2000-09-19 → 2021-09-30 · 5,310 sessions</p>
+      </article>
+      <div class="rail" aria-hidden="true"></div>
+      <article class="step">
+        <div class="step-num">02</div>
+        <h2>36 features</h2>
+        <p>Price, macro, calendar, SMA/EMA, RSI, MACD, Bollinger, 5 close lags · 30-session input window</p>
+      </article>
+      <div class="rail" aria-hidden="true"></div>
+      <article class="step">
+        <div class="step-num">03</div>
+        <h2>Conv1D + GRU</h2>
+        <p>Conv1D(32, k=3) → MaxPool(2) → Dropout → GRU(32) → Dropout → Dense(1) · TensorFlow / Keras</p>
+      </article>
+      <div class="rail" aria-hidden="true"></div>
+      <article class="step">
+        <div class="step-num">04</div>
+        <h2>Chronological eval</h2>
+        <p><code>train_test_split(..., shuffle=False)</code> · train to 2017-07-17 · holdout 2017-07-18 → 2021-09-29</p>
+      </article>
+    </section>
+
+    <main class="main">
+      <section class="col left">
+        <article class="card">
+          <div class="card-h">
+            <h3>Task definition</h3>
+            <span class="pill live">Code + CSV</span>
+          </div>
+          <p class="task-line">
+            Binary label on date <em>t</em>:
+            <code>1</code> if next-session return <code>&gt; +1%</code>,
+            else <code>0</code>.
+          </p>
+          <p class="note">
+            Class 0 is not “down.” It is everything except a large up-move:
+            down days, flat days, and small gains. A plain up/down label
+            would be ~54.5% / 45.5% — this threshold is what created the imbalance.
+          </p>
+          <dl class="meta">
+            <div><dt>Window</dt><dd>30 sessions</dd></div>
+            <div><dt>Features</dt><dd>36</dd></div>
+            <div><dt>Framework</dt><dd>TF / Keras</dd></div>
+            <div><dt>Threshold</dt><dd>0.5 sigmoid</dd></div>
+          </dl>
+        </article>
+
+        <article class="card">
+          <div class="card-h">
+            <h3>Architecture</h3>
+            <span class="pill report">Final model</span>
+          </div>
+          <ol class="arch">
+            <li><b>Conv1D</b> 32 filters · kernel 3 · ReLU</li>
+            <li><b>MaxPool1D</b> pool size 2</li>
+            <li><b>Dropout</b> 0.2</li>
+            <li><b>GRU</b> 32 units</li>
+            <li><b>Dropout</b> 0.2</li>
+            <li><b>Dense</b> 1 · sigmoid</li>
+          </ol>
+          <p class="note">Adam 5e-4 · binary cross-entropy · <code>class_weight='balanced'</code> (0.61 / 2.70). Still collapsed to the majority class.</p>
+        </article>
+
+        <article class="card">
+          <div class="card-h">
+            <h3>36-feature stack</h3>
+            <span class="pill live">From code</span>
+          </div>
+          <div class="feat-grid">
+            <div><span>5</span> Price OHLCV</div>
+            <div><span>11</span> US macro</div>
+            <div><span>3</span> Calendar</div>
+            <div><span>6</span> SMA / EMA</div>
+            <div><span>3</span> RSI / MACD</div>
+            <div><span>3</span> Bollinger</div>
+            <div><span>5</span> Close lags</div>
+          </div>
+          <div class="macro-chips" aria-label="Eleven US macro series">
+            <span>unrate</span><span>psr</span><span>m2</span><span>dspic</span>
+            <span>pce</span><span>reer</span><span>ir</span><span>ffer</span>
+            <span>tcs</span><span>indpro</span><span>ccpi</span>
+          </div>
+        </article>
+
+        <article class="card grow credit">
+          <div class="card-h">
+            <h3>How to read this</h3>
+          </div>
+          <p>
+            First author JiaYi Che · 23/31 commits · Western ECE9063, Fall 2024.
+            This page is an evaluation brief, not a performance ad.
+          </p>
+          <p>
+            No Kubernetes, no backtest, no P&amp;L. The honest number is the
+            majority baseline sitting <em>above</em> model accuracy.
+          </p>
+        </article>
+      </section>
+
+      <section class="col mid">
+        <article class="card" id="crop-eval">
+          <div class="card-h">
+            <h3>Class balance</h3>
+            <span class="pill live">Recomputed · matches Table II support</span>
+          </div>
+          <div class="bars">
+            <div class="bar-row">
+              <div class="bar-lab">
+                <strong>Train sequences</strong>
+                <span>4,201 · rows 2000-10-17 → 2017-07-17</span>
+              </div>
+              <div class="track" title="Class 0 3422 / Class 1 779">
+                <i class="c0" style="width:81.46%"></i>
+                <i class="c1" style="width:18.54%"></i>
+              </div>
+              <div class="bar-nums"><span class="c0t">0 · 3,422 (81.5%)</span><span class="c1t">1 · 779 (18.5%)</span></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-lab">
+                <strong>Test sequences</strong>
+                <span>1,028 · holdout rows from 2017-07-18</span>
+              </div>
+              <div class="track" title="Class 0 817 / Class 1 211">
+                <i class="c0" style="width:79.47%"></i>
+                <i class="c1" style="width:20.53%"></i>
+              </div>
+              <div class="bar-nums"><span class="c0t">0 · 817 (79.47%)</span><span class="c1t">1 · 211 (20.53%)</span></div>
+            </div>
+          </div>
+          <p class="note">Sequence labels start 30 sessions after each split’s first row (test eval dates begin 2017-08-29).</p>
+        </article>
+
+        <article class="card">
+          <div class="card-h">
+            <h3>Confusion matrix</h3>
+            <span class="pill derived">Backsolved from Table I + II</span>
+          </div>
+          <div class="cm-wrap">
+            <div class="cm">
+              <div class="cm-corner"></div>
+              <div class="cm-xh">Pred 0</div>
+              <div class="cm-xh">Pred 1</div>
+              <div class="cm-yh">Actual 0<br /><small>817</small></div>
+              <div class="cell tn">
+                <em>TN</em>
+                <strong>810</strong>
+              </div>
+              <div class="cell fp">
+                <em>FP</em>
+                <strong>7</strong>
+              </div>
+              <div class="cm-yh">Actual 1<br /><small>211</small></div>
+              <div class="cell fn">
+                <em>FN</em>
+                <strong>210</strong>
+              </div>
+              <div class="cell tp">
+                <em>TP</em>
+                <strong>1</strong>
+              </div>
+            </div>
+            <p class="note">
+              1,028 test sequences · 8 positive calls · 1 hit.
+              Six report statistics reconstruct this matrix uniquely
+              (accuracy 78.89%, P₁ 0.1250, R₁ 0.0047, F1₁ 0.0091).
+            </p>
+          </div>
+        </article>
+
+        <article class="card grow">
+          <div class="card-h">
+            <h3>Test-period close · true +1% days</h3>
+            <span class="pill live">CSV labels · no saved predictions</span>
+          </div>
+          <div id="timeline" class="timeline" role="img" aria-label="NASDAQ-100 close over the test window with true class-1 days marked"><!-- BAKE:TIMELINE --><svg viewBox="0 0 1000 92" preserveAspectRatio="none" role="presentation"><path d="M6.00 84.00 L9.86 83.46 L13.72 83.12 L17.58 83.19 L21.44 83.41 L25.30 83.44 L29.16 83.00 L33.02 82.48 L36.88 82.21 L40.73 82.22 L44.59 82.48 L48.45 81.04 L52.31 80.54 L56.17 80.57 L60.03 80.33 L63.89 79.95 L67.75 80.60 L71.61 80.87 L75.47 79.89 L79.33 79.26 L83.19 79.15 L87.05 79.51 L90.91 78.28 L94.77 77.71 L98.62 76.56 L102.48 75.46 L106.34 75.25 L110.20 77.09 L114.06 80.51 L117.92 77.63 L121.78 77.06 L125.64 76.24 L129.50 75.91 L133.36 74.10 L137.22 74.85 L141.08 77.59 L144.94 79.26 L148.80 78.44 L152.66 78.12 L156.52 77.43 L160.38 77.71 L164.23 77.26 L168.09 78.05 L171.95 76.59 L175.81 75.39 L179.67 76.17 L183.53 75.52 L187.39 75.37 L191.25 73.51 L195.11 73.64 L198.97 73.04 L202.83 73.45 L206.69 74.72 L210.55 74.21 L214.41 73.21 L218.27 71.90 L222.12 71.83 L225.98 72.84 L229.84 72.18 L233.70 71.51 L237.56 71.62 L241.42 72.17 L245.28 71.33 L249.14 70.13 L253.00 71.62 L256.86 71.40 L260.72 71.33 L264.58 70.62 L268.44 70.08 L272.30 71.18 L276.16 74.94 L280.02 72.43 L283.88 73.98 L287.73 76.02 L291.59 74.58 L295.45 73.49 L299.31 76.34 L303.17 77.75 L307.03 77.74 L310.89 75.58 L314.75 78.12 L318.61 77.12 L322.47 80.38 L326.33 80.76 L330.19 80.09 L334.05 78.64 L337.91 78.74 L341.77 76.81 L345.62 76.82 L349.48 75.85 L353.34 75.22 L357.20 75.05 L361.06 74.66 L364.92 74.21 L368.78 73.97 L372.64 74.98 L376.50 73.10 L380.36 72.26 L384.22 72.42 L388.08 72.07 L391.94 70.81 L395.80 70.19 L399.66 69.89 L403.52 68.66 L407.38 68.85 L411.23 68.45 L415.09 70.55 L418.95 71.06 L422.81 71.57 L426.67 72.89 L430.53 75.24 L434.39 71.92 L438.25 71.12 L442.11 69.93 L445.97 70.29 L449.83 69.03 L453.69 68.95 L457.55 67.71 L461.41 67.91 L465.27 67.10 L469.12 67.68 L472.98 72.19 L476.84 70.04 L480.70 71.32 L484.56 69.34 L488.42 70.80 L492.28 70.38 L496.14 68.71 L500.00 68.28 L503.86 68.20 L507.72 68.80 L511.58 69.77 L515.44 69.42 L519.30 68.49 L523.16 67.76 L527.02 68.16 L530.88 66.96 L534.73 65.71 L538.59 65.39 L542.45 65.33 L546.31 65.12 L550.17 64.27 L554.03 65.44 L557.89 64.62 L561.75 63.54 L565.61 62.39 L569.47 61.13 L573.33 60.44 L577.19 60.03 L581.05 59.11 L584.91 58.28 L588.77 59.96 L592.62 59.62 L596.48 56.05 L600.34 54.72 L604.20 53.88 L608.06 60.74 L611.92 61.23 L615.78 63.47 L619.64 73.51 L623.50 73.43 L627.36 70.87 L631.22 68.53 L635.08 71.12 L638.94 65.62 L642.80 61.67 L646.66 62.42 L650.52 61.79 L654.38 61.19 L658.23 57.90 L662.09 58.98 L665.95 55.82 L669.81 56.23 L673.67 54.55 L677.53 52.70 L681.39 54.57 L685.25 51.84 L689.11 51.72 L692.97 50.66 L696.83 47.66 L700.69 47.13 L704.55 46.95 L708.41 47.53 L712.27 46.55 L716.12 43.34 L719.98 43.45 L723.84 42.97 L727.70 40.29 L731.56 36.28 L735.42 33.78 L739.28 43.54 L743.14 41.82 L747.00 42.88 L750.86 44.86 L754.72 40.84 L758.58 41.88 L762.44 35.45 L766.30 37.79 L770.16 38.95 L774.02 42.98 L777.88 41.94 L781.73 37.62 L785.59 36.74 L789.45 36.32 L793.31 35.03 L797.17 32.68 L801.03 31.25 L804.89 32.66 L808.75 29.98 L812.61 30.73 L816.47 29.31 L820.33 28.98 L824.19 28.64 L828.05 26.13 L831.91 24.64 L835.77 26.58 L839.62 23.76 L843.48 22.74 L847.34 23.49 L851.20 26.07 L855.06 27.99 L858.92 33.90 L862.78 28.94 L866.64 30.02 L870.50 30.03 L874.36 29.37 L878.22 23.98 L882.08 22.12 L885.94 20.40 L889.80 22.57 L893.66 21.47 L897.52 24.24 L901.38 25.64 L905.23 25.41 L909.09 24.63 L912.95 22.96 L916.81 23.17 L920.67 22.10 L924.53 19.65 L928.39 19.79 L932.25 17.87 L936.11 16.35 L939.97 14.37 L943.83 13.88 L947.69 16.41 L951.55 12.07 L955.41 12.54 L959.27 12.26 L963.12 12.49 L966.98 11.79 L970.84 12.16 L974.70 10.69 L978.56 8.08 L982.42 8.00 L986.28 9.82 L990.14 12.76 L994.00 10.35 L994.00 84.00 L6.00 84.00 Z" fill="rgba(61,214,245,0.08)"></path><path d="M6.00 84.00 L9.86 83.46 L13.72 83.12 L17.58 83.19 L21.44 83.41 L25.30 83.44 L29.16 83.00 L33.02 82.48 L36.88 82.21 L40.73 82.22 L44.59 82.48 L48.45 81.04 L52.31 80.54 L56.17 80.57 L60.03 80.33 L63.89 79.95 L67.75 80.60 L71.61 80.87 L75.47 79.89 L79.33 79.26 L83.19 79.15 L87.05 79.51 L90.91 78.28 L94.77 77.71 L98.62 76.56 L102.48 75.46 L106.34 75.25 L110.20 77.09 L114.06 80.51 L117.92 77.63 L121.78 77.06 L125.64 76.24 L129.50 75.91 L133.36 74.10 L137.22 74.85 L141.08 77.59 L144.94 79.26 L148.80 78.44 L152.66 78.12 L156.52 77.43 L160.38 77.71 L164.23 77.26 L168.09 78.05 L171.95 76.59 L175.81 75.39 L179.67 76.17 L183.53 75.52 L187.39 75.37 L191.25 73.51 L195.11 73.64 L198.97 73.04 L202.83 73.45 L206.69 74.72 L210.55 74.21 L214.41 73.21 L218.27 71.90 L222.12 71.83 L225.98 72.84 L229.84 72.18 L233.70 71.51 L237.56 71.62 L241.42 72.17 L245.28 71.33 L249.14 70.13 L253.00 71.62 L256.86 71.40 L260.72 71.33 L264.58 70.62 L268.44 70.08 L272.30 71.18 L276.16 74.94 L280.02 72.43 L283.88 73.98 L287.73 76.02 L291.59 74.58 L295.45 73.49 L299.31 76.34 L303.17 77.75 L307.03 77.74 L310.89 75.58 L314.75 78.12 L318.61 77.12 L322.47 80.38 L326.33 80.76 L330.19 80.09 L334.05 78.64 L337.91 78.74 L341.77 76.81 L345.62 76.82 L349.48 75.85 L353.34 75.22 L357.20 75.05 L361.06 74.66 L364.92 74.21 L368.78 73.97 L372.64 74.98 L376.50 73.10 L380.36 72.26 L384.22 72.42 L388.08 72.07 L391.94 70.81 L395.80 70.19 L399.66 69.89 L403.52 68.66 L407.38 68.85 L411.23 68.45 L415.09 70.55 L418.95 71.06 L422.81 71.57 L426.67 72.89 L430.53 75.24 L434.39 71.92 L438.25 71.12 L442.11 69.93 L445.97 70.29 L449.83 69.03 L453.69 68.95 L457.55 67.71 L461.41 67.91 L465.27 67.10 L469.12 67.68 L472.98 72.19 L476.84 70.04 L480.70 71.32 L484.56 69.34 L488.42 70.80 L492.28 70.38 L496.14 68.71 L500.00 68.28 L503.86 68.20 L507.72 68.80 L511.58 69.77 L515.44 69.42 L519.30 68.49 L523.16 67.76 L527.02 68.16 L530.88 66.96 L534.73 65.71 L538.59 65.39 L542.45 65.33 L546.31 65.12 L550.17 64.27 L554.03 65.44 L557.89 64.62 L561.75 63.54 L565.61 62.39 L569.47 61.13 L573.33 60.44 L577.19 60.03 L581.05 59.11 L584.91 58.28 L588.77 59.96 L592.62 59.62 L596.48 56.05 L600.34 54.72 L604.20 53.88 L608.06 60.74 L611.92 61.23 L615.78 63.47 L619.64 73.51 L623.50 73.43 L627.36 70.87 L631.22 68.53 L635.08 71.12 L638.94 65.62 L642.80 61.67 L646.66 62.42 L650.52 61.79 L654.38 61.19 L658.23 57.90 L662.09 58.98 L665.95 55.82 L669.81 56.23 L673.67 54.55 L677.53 52.70 L681.39 54.57 L685.25 51.84 L689.11 51.72 L692.97 50.66 L696.83 47.66 L700.69 47.13 L704.55 46.95 L708.41 47.53 L712.27 46.55 L716.12 43.34 L719.98 43.45 L723.84 42.97 L727.70 40.29 L731.56 36.28 L735.42 33.78 L739.28 43.54 L743.14 41.82 L747.00 42.88 L750.86 44.86 L754.72 40.84 L758.58 41.88 L762.44 35.45 L766.30 37.79 L770.16 38.95 L774.02 42.98 L777.88 41.94 L781.73 37.62 L785.59 36.74 L789.45 36.32 L793.31 35.03 L797.17 32.68 L801.03 31.25 L804.89 32.66 L808.75 29.98 L812.61 30.73 L816.47 29.31 L820.33 28.98 L824.19 28.64 L828.05 26.13 L831.91 24.64 L835.77 26.58 L839.62 23.76 L843.48 22.74 L847.34 23.49 L851.20 26.07 L855.06 27.99 L858.92 33.90 L862.78 28.94 L866.64 30.02 L870.50 30.03 L874.36 29.37 L878.22 23.98 L882.08 22.12 L885.94 20.40 L889.80 22.57 L893.66 21.47 L897.52 24.24 L901.38 25.64 L905.23 25.41 L909.09 24.63 L912.95 22.96 L916.81 23.17 L920.67 22.10 L924.53 19.65 L928.39 19.79 L932.25 17.87 L936.11 16.35 L939.97 14.37 L943.83 13.88 L947.69 16.41 L951.55 12.07 L955.41 12.54 L959.27 12.26 L963.12 12.49 L966.98 11.79 L970.84 12.16 L974.70 10.69 L978.56 8.08 L982.42 8.00 L986.28 9.82 L990.14 12.76 L994.00 10.35" fill="none" stroke="#3dd6f5" stroke-width="1.6"></path><circle cx="6.00" cy="84.00" r="1.7" fill="#f0a35e"></circle><circle cx="67.75" cy="80.60" r="1.7" fill="#f0a35e"></circle><circle cx="114.06" cy="80.51" r="1.7" fill="#f0a35e"></circle><circle cx="117.92" cy="77.63" r="1.7" fill="#f0a35e"></circle><circle cx="144.94" cy="79.26" r="1.7" fill="#f0a35e"></circle><circle cx="156.52" cy="77.43" r="1.7" fill="#f0a35e"></circle><circle cx="171.95" cy="76.59" r="1.7" fill="#f0a35e"></circle><circle cx="187.39" cy="75.37" r="1.7" fill="#f0a35e"></circle><circle cx="210.55" cy="74.21" r="1.7" fill="#f0a35e"></circle><circle cx="214.41" cy="73.21" r="1.7" fill="#f0a35e"></circle><circle cx="256.86" cy="71.40" r="1.7" fill="#f0a35e"></circle><circle cx="310.89" cy="75.58" r="1.7" fill="#f0a35e"></circle><circle cx="314.75" cy="78.12" r="1.7" fill="#f0a35e"></circle><circle cx="337.91" cy="78.74" r="1.7" fill="#f0a35e"></circle><circle cx="388.08" cy="72.07" r="1.7" fill="#f0a35e"></circle><circle cx="430.53" cy="75.24" r="1.7" fill="#f0a35e"></circle><circle cx="434.39" cy="71.92" r="1.7" fill="#f0a35e"></circle><circle cx="472.98" cy="72.19" r="1.7" fill="#f0a35e"></circle><circle cx="480.70" cy="71.32" r="1.7" fill="#f0a35e"></circle><circle cx="492.28" cy="70.38" r="1.7" fill="#f0a35e"></circle><circle cx="588.77" cy="59.96" r="1.7" fill="#f0a35e"></circle><circle cx="592.62" cy="59.62" r="1.7" fill="#f0a35e"></circle><circle cx="619.64" cy="73.51" r="1.7" fill="#f0a35e"></circle><circle cx="635.08" cy="71.12" r="1.7" fill="#f0a35e"></circle><circle cx="638.94" cy="65.62" r="1.7" fill="#f0a35e"></circle><circle cx="650.52" cy="61.79" r="1.7" fill="#f0a35e"></circle><circle cx="654.38" cy="61.19" r="1.7" fill="#f0a35e"></circle><circle cx="681.39" cy="54.57" r="1.7" fill="#f0a35e"></circle><circle cx="685.25" cy="51.84" r="1.7" fill="#f0a35e"></circle><circle cx="692.97" cy="50.66" r="1.7" fill="#f0a35e"></circle><circle cx="696.83" cy="47.66" r="1.7" fill="#f0a35e"></circle><circle cx="704.55" cy="46.95" r="1.7" fill="#f0a35e"></circle><circle cx="712.27" cy="46.55" r="1.7" fill="#f0a35e"></circle><circle cx="723.84" cy="42.97" r="1.7" fill="#f0a35e"></circle><circle cx="739.28" cy="43.54" r="1.7" fill="#f0a35e"></circle><circle cx="743.14" cy="41.82" r="1.7" fill="#f0a35e"></circle><circle cx="750.86" cy="44.86" r="1.7" fill="#f0a35e"></circle><circle cx="754.72" cy="40.84" r="1.7" fill="#f0a35e"></circle><circle cx="758.58" cy="41.88" r="1.7" fill="#f0a35e"></circle><circle cx="774.02" cy="42.98" r="1.7" fill="#f0a35e"></circle><circle cx="777.88" cy="41.94" r="1.7" fill="#f0a35e"></circle><circle cx="804.89" cy="32.66" r="1.7" fill="#f0a35e"></circle><circle cx="812.61" cy="30.73" r="1.7" fill="#f0a35e"></circle><circle cx="820.33" cy="28.98" r="1.7" fill="#f0a35e"></circle><circle cx="835.77" cy="26.58" r="1.7" fill="#f0a35e"></circle><circle cx="858.92" cy="33.90" r="1.7" fill="#f0a35e"></circle><circle cx="862.78" cy="28.94" r="1.7" fill="#f0a35e"></circle><circle cx="874.36" cy="29.37" r="1.7" fill="#f0a35e"></circle><circle cx="882.08" cy="22.12" r="1.7" fill="#f0a35e"></circle><circle cx="889.80" cy="22.57" r="1.7" fill="#f0a35e"></circle><circle cx="947.69" cy="16.41" r="1.7" fill="#f0a35e"></circle><circle cx="970.84" cy="12.16" r="1.7" fill="#f0a35e"></circle></svg><!-- /BAKE:TIMELINE --></div>
+          <div id="month-heat" class="month-heat" aria-label="Monthly rate of true +1% sessions"><!-- BAKE:HEAT --><svg viewBox="0 0 1000 28" preserveAspectRatio="none"><rect x="0.00" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.818)"><title>2017-08 · 1/3 class 1</title></rect><rect x="20.04" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.276)"><title>2017-09 · 1/20 class 1</title></rect><rect x="40.08" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.354)"><title>2017-10 · 2/22 class 1</title></rect><rect x="60.12" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.453)"><title>2017-11 · 3/21 class 1</title></rect><rect x="80.16" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.371)"><title>2017-12 · 2/20 class 1</title></rect><rect x="100.20" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.453)"><title>2018-01 · 3/21 class 1</title></rect><rect x="120.24" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.818)"><title>2018-02 · 6/18 class 1</title></rect><rect x="140.28" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.544)"><title>2018-03 · 4/21 class 1</title></rect><rect x="160.32" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.909)"><title>2018-04 · 8/21 class 1</title></rect><rect x="180.36" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.528)"><title>2018-05 · 4/22 class 1</title></rect><rect x="200.40" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.271)"><title>2018-06 · 1/21 class 1</title></rect><rect x="220.44" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.544)"><title>2018-07 · 4/21 class 1</title></rect><rect x="240.48" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.346)"><title>2018-08 · 2/23 class 1</title></rect><rect x="260.52" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.381)"><title>2018-09 · 2/19 class 1</title></rect><rect x="280.56" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.679)"><title>2018-10 · 6/23 class 1</title></rect><rect x="300.60" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.636)"><title>2018-11 · 5/21 class 1</title></rect><rect x="320.64" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.381)"><title>2018-12 · 2/19 class 1</title></rect><rect x="340.68" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.727)"><title>2019-01 · 6/21 class 1</title></rect><rect x="360.72" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.381)"><title>2019-02 · 2/19 class 1</title></rect><rect x="380.76" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.544)"><title>2019-03 · 4/21 class 1</title></rect><rect x="400.80" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.271)"><title>2019-04 · 1/21 class 1</title></rect><rect x="420.84" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.441)"><title>2019-05 · 3/22 class 1</title></rect><rect x="440.88" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.658)"><title>2019-06 · 5/20 class 1</title></rect><rect x="460.92" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.354)"><title>2019-07 · 2/22 class 1</title></rect><rect x="480.96" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.876)"><title>2019-08 · 8/22 class 1</title></rect><rect x="501.00" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.467)"><title>2019-09 · 3/20 class 1</title></rect><rect x="521.04" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.679)"><title>2019-10 · 6/23 class 1</title></rect><rect x="541.08" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.276)"><title>2019-11 · 1/20 class 1</title></rect><rect x="561.12" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.362)"><title>2019-12 · 2/21 class 1</title></rect><rect x="581.16" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.636)"><title>2020-01 · 5/21 class 1</title></rect><rect x="601.20" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.684)"><title>2020-02 · 5/19 class 1</title></rect><rect x="621.24" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.876)"><title>2020-03 · 8/22 class 1</title></rect><rect x="641.28" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,1.000)"><title>2020-04 · 9/21 class 1</title></rect><rect x="661.32" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.754)"><title>2020-05 · 6/20 class 1</title></rect><rect x="681.36" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.876)"><title>2020-06 · 8/22 class 1</title></rect><rect x="701.40" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.963)"><title>2020-07 · 9/22 class 1</title></rect><rect x="721.44" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.909)"><title>2020-08 · 8/21 class 1</title></rect><rect x="741.48" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.818)"><title>2020-09 · 7/21 class 1</title></rect><rect x="761.52" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.615)"><title>2020-10 · 5/22 class 1</title></rect><rect x="781.56" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.754)"><title>2020-11 · 6/20 class 1</title></rect><rect x="801.60" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.354)"><title>2020-12 · 2/22 class 1</title></rect><rect x="821.64" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.684)"><title>2021-01 · 5/19 class 1</title></rect><rect x="841.68" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.482)"><title>2021-02 · 3/19 class 1</title></rect><rect x="861.72" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.845)"><title>2021-03 · 8/23 class 1</title></rect><rect x="881.76" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.636)"><title>2021-04 · 5/21 class 1</title></rect><rect x="901.80" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.467)"><title>2021-05 · 3/20 class 1</title></rect><rect x="921.84" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.528)"><title>2021-06 · 4/22 class 1</title></rect><rect x="941.88" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.453)"><title>2021-07 · 3/21 class 1</title></rect><rect x="961.92" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.441)"><title>2021-08 · 3/22 class 1</title></rect><rect x="981.96" y="4" width="18.04" height="16" rx="2" fill="rgba(240,163,94,0.180)"><title>2021-09 · 0/20 class 1</title></rect></svg><!-- /BAKE:HEAT --></div>
+        </article>
+      </section>
+
+      <section class="col right">
+        <article class="card baseline" id="crop-baseline">
+          <div class="card-h">
+            <h3>Baseline vs model</h3>
+            <span class="pill report">Table I · literacy, not a trophy</span>
+          </div>
+          <div class="vs">
+            <div>
+              <div class="vs-k">Majority-class baseline</div>
+              <div class="vs-v">79.47%</div>
+              <div class="vs-s">Always predict class 0 · 817 / 1,028</div>
+            </div>
+            <div class="delta">
+              <span>−0.58 pp</span>
+              Model is slightly worse
+            </div>
+            <div>
+              <div class="vs-k">Conv1D + GRU accuracy</div>
+              <div class="vs-v dim">78.89%</div>
+              <div class="vs-s">Report Table I test accuracy</div>
+            </div>
+          </div>
+          <ul class="chips">
+            <li>ROC-AUC <b>0.5386</b></li>
+            <li>Macro-F1 <b>0.45</b></li>
+            <li>Balanced acc. <b>49.81%</b></li>
+            <li>Train acc. <b>54.80%</b></li>
+          </ul>
+          <p class="note">
+            Accuracy is the wrong headline under a 79.5% majority class.
+            The useful reading is collapse: minority recall 0.0047 after
+            balanced class weights. That is the result.
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="card-h">
+            <h3>Per-class precision / recall / F1</h3>
+            <span class="pill report">Report Table II</span>
+          </div>
+          <table class="report">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Prec.</th>
+                <th>Recall</th>
+                <th>F1</th>
+                <th>Support</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0 · ≤ +1%</td>
+                <td>0.79</td>
+                <td>0.99</td>
+                <td>0.88</td>
+                <td>817</td>
+              </tr>
+              <tr class="hi">
+                <td>1 · &gt; +1%</td>
+                <td>0.12</td>
+                <td>0.0047</td>
+                <td>0.01</td>
+                <td>211</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>Macro avg</td>
+                <td>0.46</td>
+                <td>0.50</td>
+                <td>0.45</td>
+                <td>1,028</td>
+              </tr>
+            </tfoot>
+          </table>
+        </article>
+
+        <article class="card grow table-card">
+          <input class="sess-filter" type="radio" name="sess" id="f-all" checked>
+          <input class="sess-filter" type="radio" name="sess" id="f-1">
+          <input class="sess-filter" type="radio" name="sess" id="f-0">
+          <div class="card-h">
+            <h3>Holdout sessions</h3>
+            <span class="pill live">True class from CSV</span>
+            <div class="filters" role="group" aria-label="Filter sessions">
+              <label for="f-all">All</label>
+              <label for="f-1">Class 1</label>
+              <label for="f-0">Class 0</label>
+            </div>
+          </div>
+          <p class="note tight">
+            Predicted class is not shown per row — <code>algorithm.py</code> never wrote predictions to disk.
+            True labels and next-session returns below are from the CSV.
+          </p>
+          <div class="table-scroll">
+            <table class="sessions">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Close</th>
+                  <th>Next-session r</th>
+                  <th>True</th>
+                  <th>Pred</th>
+                </tr>
+              </thead>
+              <tbody id="session-body"><!-- BAKE:ROWS --><tr class="up c1"><td>2017-08-29</td><td>5,869.75</td><td class="up">+1.11%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-08-30</td><td>5,935.00</td><td class="flat">+0.94%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-08-31</td><td>5,990.75</td><td class="flat">-0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-01</td><td>5,988.25</td><td class="flat">-0.82%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-05</td><td>5,939.25</td><td class="flat">+0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-06</td><td>5,955.00</td><td class="flat">+0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-07</td><td>5,970.00</td><td class="flat">-0.90%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2017-09-08</td><td>5,916.25</td><td class="up">+1.12%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-11</td><td>5,982.50</td><td class="flat">+0.23%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-12</td><td>5,996.50</td><td class="flat">+0.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-13</td><td>6,002.00</td><td class="flat">-0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-14</td><td>5,966.25</td><td class="flat">+0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-15</td><td>5,974.00</td><td class="flat">+0.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-18</td><td>5,986.75</td><td class="flat">+0.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-19</td><td>5,997.00</td><td class="flat">-0.31%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-20</td><td>5,978.50</td><td class="flat">-0.56%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-21</td><td>5,945.25</td><td class="flat">-0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-22</td><td>5,935.75</td><td class="flat">-1.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-25</td><td>5,876.50</td><td class="flat">+0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-26</td><td>5,892.50</td><td class="flat">+0.82%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-27</td><td>5,941.00</td><td class="flat">-0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-28</td><td>5,938.50</td><td class="flat">+0.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-09-29</td><td>5,982.50</td><td class="flat">-0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-02</td><td>5,980.50</td><td class="flat">+0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-03</td><td>5,998.00</td><td class="flat">+0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2017-10-04</td><td>6,004.00</td><td class="up">+1.03%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-05</td><td>6,065.75</td><td class="flat">-0.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-06</td><td>6,064.25</td><td class="flat">+0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-09</td><td>6,064.50</td><td class="flat">+0.01%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-10</td><td>6,065.25</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-11</td><td>6,082.50</td><td class="flat">-0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-12</td><td>6,074.75</td><td class="flat">+0.41%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-13</td><td>6,099.75</td><td class="flat">+0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-16</td><td>6,120.25</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-17</td><td>6,123.75</td><td class="flat">-0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-18</td><td>6,119.25</td><td class="flat">-0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-19</td><td>6,097.75</td><td class="flat">+0.22%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-20</td><td>6,111.00</td><td class="flat">-0.76%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-23</td><td>6,064.75</td><td class="flat">+0.24%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-24</td><td>6,079.50</td><td class="flat">-0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-25</td><td>6,064.50</td><td class="flat">+0.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2017-10-26</td><td>6,084.75</td><td class="up">+2.14%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-27</td><td>6,215.25</td><td class="flat">+0.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-30</td><td>6,224.25</td><td class="flat">+0.41%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-10-31</td><td>6,249.75</td><td class="flat">-0.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-01</td><td>6,240.75</td><td class="flat">-0.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-02</td><td>6,235.75</td><td class="flat">+0.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-03</td><td>6,290.50</td><td class="flat">+0.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-06</td><td>6,313.50</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-07</td><td>6,316.00</td><td class="flat">+0.40%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-08</td><td>6,341.50</td><td class="flat">-0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-09</td><td>6,314.50</td><td class="flat">-0.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-10</td><td>6,309.25</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-13</td><td>6,312.00</td><td class="flat">-0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-14</td><td>6,293.50</td><td class="flat">-0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2017-11-15</td><td>6,266.25</td><td class="up">+1.19%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-16</td><td>6,341.00</td><td class="flat">-0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-17</td><td>6,313.25</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2017-11-20</td><td>6,316.00</td><td class="up">+1.01%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-21</td><td>6,379.50</td><td class="flat">+0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-22</td><td>6,389.50</td><td class="flat">+0.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-24</td><td>6,413.50</td><td class="flat">-0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-27</td><td>6,413.25</td><td class="flat">+0.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-28</td><td>6,420.25</td><td class="flat">-1.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2017-11-29</td><td>6,305.50</td><td class="up">+1.01%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-11-30</td><td>6,369.00</td><td class="flat">-0.36%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-01</td><td>6,346.25</td><td class="flat">-1.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-04</td><td>6,265.25</td><td class="flat">+0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-05</td><td>6,271.75</td><td class="flat">+0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-06</td><td>6,293.00</td><td class="flat">+0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-07</td><td>6,323.00</td><td class="flat">+0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-08</td><td>6,340.00</td><td class="flat">+0.91%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-11</td><td>6,397.50</td><td class="flat">-0.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-12</td><td>6,384.25</td><td class="flat">+0.22%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-13</td><td>6,398.50</td><td class="flat">-0.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2017-12-14</td><td>6,391.75</td><td class="up">+1.35%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-15</td><td>6,478.00</td><td class="flat">+0.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-18</td><td>6,535.25</td><td class="flat">-0.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-19</td><td>6,500.75</td><td class="flat">-0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-20</td><td>6,489.00</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-21</td><td>6,492.25</td><td class="flat">-0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-22</td><td>6,483.75</td><td class="flat">-0.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-26</td><td>6,460.00</td><td class="flat">-0.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-27</td><td>6,454.00</td><td class="flat">-0.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2017-12-28</td><td>6,446.25</td><td class="flat">-0.58%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2017-12-29</td><td>6,408.75</td><td class="up">+1.65%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-01-02</td><td>6,514.75</td><td class="up">+1.07%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-03</td><td>6,584.50</td><td class="flat">+0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-04</td><td>6,603.50</td><td class="flat">+0.97%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-05</td><td>6,667.75</td><td class="flat">+0.30%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-08</td><td>6,688.00</td><td class="flat">-0.01%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-09</td><td>6,687.00</td><td class="flat">-0.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-10</td><td>6,677.25</td><td class="flat">+0.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-11</td><td>6,726.50</td><td class="flat">+0.72%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-12</td><td>6,775.25</td><td class="flat">-0.19%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-16</td><td>6,762.25</td><td class="flat">+0.91%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-17</td><td>6,823.75</td><td class="flat">-0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-18</td><td>6,813.00</td><td class="flat">+0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-01-19</td><td>6,845.75</td><td class="up">+1.25%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-22</td><td>6,931.00</td><td class="flat">+0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-23</td><td>6,965.75</td><td class="flat">-0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-24</td><td>6,931.25</td><td class="flat">+0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-01-25</td><td>6,931.50</td><td class="up">+1.42%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-26</td><td>7,030.25</td><td class="flat">-0.54%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-29</td><td>6,992.50</td><td class="flat">-0.73%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-30</td><td>6,941.50</td><td class="flat">+0.30%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-01-31</td><td>6,962.50</td><td class="flat">-0.92%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-01</td><td>6,898.50</td><td class="flat">-2.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-02</td><td>6,755.75</td><td class="flat">-4.83%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-02-05</td><td>6,429.25</td><td class="up">+3.49%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-06</td><td>6,653.75</td><td class="flat">-1.47%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-07</td><td>6,555.75</td><td class="flat">-3.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-02-08</td><td>6,317.25</td><td class="up">+1.59%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-02-09</td><td>6,417.75</td><td class="up">+1.78%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-12</td><td>6,531.75</td><td class="flat">+0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-02-13</td><td>6,560.50</td><td class="up">+1.93%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-02-14</td><td>6,687.00</td><td class="up">+1.93%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-15</td><td>6,816.00</td><td class="flat">-0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-16</td><td>6,786.75</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-20</td><td>6,790.50</td><td class="flat">-0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-21</td><td>6,760.50</td><td class="flat">+0.42%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-02-22</td><td>6,788.75</td><td class="up">+3.11%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-26</td><td>7,000.00</td><td class="flat">-1.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-27</td><td>6,915.75</td><td class="flat">-0.73%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-02-28</td><td>6,865.00</td><td class="flat">-1.52%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-01</td><td>6,760.75</td><td class="flat">+0.65%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-03-02</td><td>6,804.75</td><td class="up">+1.07%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-05</td><td>6,877.50</td><td class="flat">+0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-06</td><td>6,907.75</td><td class="flat">+0.24%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-07</td><td>6,924.50</td><td class="flat">+0.72%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-03-08</td><td>6,974.25</td><td class="up">+1.78%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-09</td><td>7,098.25</td><td class="flat">+0.58%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-12</td><td>7,139.50</td><td class="flat">-1.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-13</td><td>7,058.25</td><td class="flat">-0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-14</td><td>7,033.50</td><td class="flat">+0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-15</td><td>7,046.50</td><td class="flat">-0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-16</td><td>7,044.00</td><td class="flat">-1.84%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-19</td><td>6,914.25</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-20</td><td>6,917.50</td><td class="flat">-0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-21</td><td>6,884.00</td><td class="flat">-2.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-22</td><td>6,692.00</td><td class="flat">-2.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-03-23</td><td>6,554.25</td><td class="up">+3.35%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-26</td><td>6,773.50</td><td class="flat">-3.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-27</td><td>6,561.25</td><td class="flat">-1.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-03-28</td><td>6,477.25</td><td class="up">+1.80%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-03-29</td><td>6,594.00</td><td class="flat">-3.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-04-02</td><td>6,393.25</td><td class="up">+1.19%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-04-03</td><td>6,469.25</td><td class="up">+1.75%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-04</td><td>6,582.50</td><td class="flat">+0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-05</td><td>6,600.25</td><td class="flat">-2.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-06</td><td>6,454.75</td><td class="flat">+0.65%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-04-09</td><td>6,497.00</td><td class="up">+1.96%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-10</td><td>6,624.25</td><td class="flat">-0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-04-11</td><td>6,592.75</td><td class="up">+1.18%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-12</td><td>6,670.75</td><td class="flat">-0.45%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-04-13</td><td>6,640.75</td><td class="up">+1.07%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-04-16</td><td>6,712.00</td><td class="up">+1.74%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-17</td><td>6,828.75</td><td class="flat">+0.22%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-18</td><td>6,843.50</td><td class="flat">-0.93%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-19</td><td>6,780.00</td><td class="flat">-1.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-20</td><td>6,676.25</td><td class="flat">-0.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-23</td><td>6,667.00</td><td class="flat">-2.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-24</td><td>6,526.75</td><td class="flat">+0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-04-25</td><td>6,555.75</td><td class="up">+2.73%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-26</td><td>6,734.75</td><td class="flat">-0.97%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-04-27</td><td>6,669.75</td><td class="flat">-0.85%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-04-30</td><td>6,613.00</td><td class="up">+1.19%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-01</td><td>6,692.00</td><td class="flat">-0.87%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-02</td><td>6,633.50</td><td class="flat">+0.47%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-05-03</td><td>6,664.50</td><td class="up">+1.65%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-04</td><td>6,774.75</td><td class="flat">+0.76%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-07</td><td>6,826.00</td><td class="flat">-0.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-05-08</td><td>6,820.50</td><td class="up">+1.11%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-05-09</td><td>6,896.00</td><td class="up">+1.00%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-10</td><td>6,965.00</td><td class="flat">-0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-11</td><td>6,960.00</td><td class="flat">+0.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-14</td><td>6,974.00</td><td class="flat">-1.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-15</td><td>6,890.50</td><td class="flat">+0.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-16</td><td>6,937.25</td><td class="flat">-0.45%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-17</td><td>6,905.75</td><td class="flat">-0.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-18</td><td>6,874.00</td><td class="flat">+0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-21</td><td>6,915.75</td><td class="flat">-0.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-22</td><td>6,909.25</td><td class="flat">+0.69%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-23</td><td>6,957.00</td><td class="flat">+0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-24</td><td>6,957.25</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-25</td><td>6,960.25</td><td class="flat">-0.23%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-29</td><td>6,944.50</td><td class="flat">+0.62%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-05-30</td><td>6,987.25</td><td class="flat">-0.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-05-31</td><td>6,977.00</td><td class="up">+1.52%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-01</td><td>7,083.00</td><td class="flat">+0.92%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-04</td><td>7,148.25</td><td class="flat">+0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-05</td><td>7,179.25</td><td class="flat">+0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-06</td><td>7,215.00</td><td class="flat">-0.75%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-07</td><td>7,161.00</td><td class="flat">-0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-08</td><td>7,151.50</td><td class="flat">+0.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-11</td><td>7,170.25</td><td class="flat">+0.41%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-12</td><td>7,199.50</td><td class="flat">+0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-06-13</td><td>7,204.25</td><td class="up">+1.10%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-14</td><td>7,283.75</td><td class="flat">-0.36%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-15</td><td>7,257.50</td><td class="flat">+0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-18</td><td>7,276.00</td><td class="flat">-0.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-19</td><td>7,252.25</td><td class="flat">+0.84%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-20</td><td>7,313.25</td><td class="flat">-1.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-21</td><td>7,237.75</td><td class="flat">-0.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-22</td><td>7,222.75</td><td class="flat">-2.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-25</td><td>7,073.50</td><td class="flat">+0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-26</td><td>7,104.00</td><td class="flat">-1.49%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-27</td><td>6,998.25</td><td class="flat">+0.89%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-28</td><td>7,060.50</td><td class="flat">+0.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-06-29</td><td>7,066.75</td><td class="flat">+0.70%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-02</td><td>7,116.50</td><td class="flat">-1.30%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-07-03</td><td>7,023.75</td><td class="up">+1.45%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-07-05</td><td>7,125.75</td><td class="up">+1.51%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-06</td><td>7,233.50</td><td class="flat">+0.92%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-09</td><td>7,300.25</td><td class="flat">+0.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-10</td><td>7,301.50</td><td class="flat">-0.65%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-07-11</td><td>7,253.75</td><td class="up">+1.78%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-12</td><td>7,382.75</td><td class="flat">+0.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-13</td><td>7,393.00</td><td class="flat">-0.92%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-07-16</td><td>7,325.00</td><td class="up">+1.32%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-17</td><td>7,421.75</td><td class="flat">-0.23%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-18</td><td>7,404.50</td><td class="flat">-0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-19</td><td>7,367.75</td><td class="flat">-0.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-20</td><td>7,360.00</td><td class="flat">+0.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-23</td><td>7,430.50</td><td class="flat">-0.19%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-24</td><td>7,416.25</td><td class="flat">+0.72%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-25</td><td>7,469.50</td><td class="flat">-0.52%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-26</td><td>7,430.75</td><td class="flat">-1.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-27</td><td>7,301.25</td><td class="flat">-1.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-30</td><td>7,200.50</td><td class="flat">+0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-07-31</td><td>7,244.75</td><td class="flat">+0.45%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-08-01</td><td>7,277.00</td><td class="up">+1.49%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-02</td><td>7,385.75</td><td class="flat">+0.22%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-03</td><td>7,402.00</td><td class="flat">+0.57%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-06</td><td>7,444.00</td><td class="flat">+0.45%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-07</td><td>7,477.25</td><td class="flat">-0.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-08</td><td>7,471.50</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-09</td><td>7,475.50</td><td class="flat">-0.65%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-10</td><td>7,427.00</td><td class="flat">-0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-13</td><td>7,417.00</td><td class="flat">+0.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-14</td><td>7,457.75</td><td class="flat">-1.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-15</td><td>7,374.00</td><td class="flat">+0.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-16</td><td>7,389.00</td><td class="flat">-0.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-17</td><td>7,387.75</td><td class="flat">-0.01%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-20</td><td>7,387.00</td><td class="flat">+0.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-21</td><td>7,397.50</td><td class="flat">+0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-22</td><td>7,433.25</td><td class="flat">-0.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-23</td><td>7,424.50</td><td class="flat">+0.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-24</td><td>7,495.75</td><td class="flat">+0.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-27</td><td>7,568.00</td><td class="flat">+0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-08-28</td><td>7,578.00</td><td class="up">+1.20%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-29</td><td>7,668.75</td><td class="flat">-0.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-30</td><td>7,649.00</td><td class="flat">+0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-08-31</td><td>7,661.25</td><td class="flat">-0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-04</td><td>7,638.75</td><td class="flat">-1.40%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-05</td><td>7,531.75</td><td class="flat">-0.99%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-06</td><td>7,457.50</td><td class="flat">-0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-07</td><td>7,438.50</td><td class="flat">+0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-10</td><td>7,460.25</td><td class="flat">+0.69%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-11</td><td>7,512.00</td><td class="flat">-0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-09-12</td><td>7,485.75</td><td class="up">+1.05%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-13</td><td>7,564.50</td><td class="flat">-0.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-14</td><td>7,544.75</td><td class="flat">-1.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-17</td><td>7,436.25</td><td class="flat">+0.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-18</td><td>7,495.25</td><td class="flat">+0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-09-19</td><td>7,497.50</td><td class="up">+1.10%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-20</td><td>7,579.75</td><td class="flat">+0.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-21</td><td>7,589.00</td><td class="flat">-0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-24</td><td>7,586.00</td><td class="flat">+0.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-25</td><td>7,595.25</td><td class="flat">-0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-26</td><td>7,590.25</td><td class="flat">+0.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-27</td><td>7,657.25</td><td class="flat">-0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-09-28</td><td>7,655.25</td><td class="flat">+0.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-01</td><td>7,675.50</td><td class="flat">-0.30%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-02</td><td>7,652.75</td><td class="flat">+0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-03</td><td>7,664.75</td><td class="flat">-1.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-04</td><td>7,514.25</td><td class="flat">-1.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-05</td><td>7,436.00</td><td class="flat">-0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-08</td><td>7,391.75</td><td class="flat">+0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-09</td><td>7,399.00</td><td class="flat">-4.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-10</td><td>7,032.00</td><td class="flat">-0.01%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-10-11</td><td>7,031.00</td><td class="up">+2.01%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-12</td><td>7,172.25</td><td class="flat">-1.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-10-15</td><td>7,076.50</td><td class="up">+3.92%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-16</td><td>7,353.75</td><td class="flat">-0.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-17</td><td>7,313.25</td><td class="flat">-2.40%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-18</td><td>7,137.75</td><td class="flat">-0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-19</td><td>7,106.50</td><td class="flat">+0.69%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-22</td><td>7,155.25</td><td class="flat">-0.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-23</td><td>7,140.25</td><td class="flat">-4.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-10-24</td><td>6,836.25</td><td class="up">+1.32%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-25</td><td>6,926.50</td><td class="flat">-0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-10-26</td><td>6,893.25</td><td class="flat">-2.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-10-29</td><td>6,736.25</td><td class="up">+1.17%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-10-30</td><td>6,815.25</td><td class="up">+2.35%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-10-31</td><td>6,975.50</td><td class="up">+1.47%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-01</td><td>7,077.75</td><td class="flat">-1.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-02</td><td>6,980.25</td><td class="flat">-0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-05</td><td>6,949.50</td><td class="flat">+0.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-11-06</td><td>7,016.50</td><td class="up">+2.88%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-07</td><td>7,218.50</td><td class="flat">-0.73%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-08</td><td>7,166.00</td><td class="flat">-1.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-09</td><td>7,031.25</td><td class="flat">-2.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-12</td><td>6,835.00</td><td class="flat">+0.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-13</td><td>6,853.00</td><td class="flat">-1.24%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-11-14</td><td>6,768.25</td><td class="up">+2.18%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-15</td><td>6,915.50</td><td class="flat">-0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-16</td><td>6,895.25</td><td class="flat">-3.24%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-19</td><td>6,672.00</td><td class="flat">-2.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-20</td><td>6,532.50</td><td class="flat">+0.67%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-21</td><td>6,576.25</td><td class="flat">-0.69%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-11-23</td><td>6,531.00</td><td class="up">+2.18%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-26</td><td>6,673.25</td><td class="flat">+0.59%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-11-27</td><td>6,712.50</td><td class="up">+3.07%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-28</td><td>6,918.25</td><td class="flat">-0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-11-29</td><td>6,913.25</td><td class="flat">+0.52%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-11-30</td><td>6,949.50</td><td class="up">+1.56%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-03</td><td>7,058.25</td><td class="flat">-3.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-04</td><td>6,803.25</td><td class="flat">+0.31%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-06</td><td>6,824.50</td><td class="flat">-2.95%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-12-07</td><td>6,623.50</td><td class="up">+1.14%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-10</td><td>6,699.25</td><td class="flat">+0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-11</td><td>6,717.00</td><td class="flat">+0.77%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-12</td><td>6,769.00</td><td class="flat">-0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-13</td><td>6,752.00</td><td class="flat">-2.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-14</td><td>6,599.50</td><td class="flat">-2.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-17</td><td>6,466.25</td><td class="flat">-0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-18</td><td>6,462.75</td><td class="flat">-1.98%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-19</td><td>6,334.75</td><td class="flat">-0.41%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-20</td><td>6,308.50</td><td class="flat">-0.81%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-21</td><td>6,257.25</td><td class="flat">-5.84%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2018-12-24</td><td>5,892.00</td><td class="up">+6.68%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-26</td><td>6,285.50</td><td class="flat">+0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-27</td><td>6,323.50</td><td class="flat">-0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-28</td><td>6,293.25</td><td class="flat">+0.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2018-12-31</td><td>6,333.25</td><td class="flat">+0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-02</td><td>6,371.00</td><td class="flat">-3.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-01-03</td><td>6,162.00</td><td class="up">+4.41%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-04</td><td>6,434.00</td><td class="flat">+0.97%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-07</td><td>6,496.50</td><td class="flat">+0.94%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-08</td><td>6,557.25</td><td class="flat">+0.72%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-09</td><td>6,604.75</td><td class="flat">+0.31%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-10</td><td>6,625.25</td><td class="flat">-0.19%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-11</td><td>6,612.75</td><td class="flat">-1.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-01-14</td><td>6,545.00</td><td class="up">+2.01%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-15</td><td>6,676.75</td><td class="flat">-0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-16</td><td>6,666.25</td><td class="flat">+0.81%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-01-17</td><td>6,720.00</td><td class="up">+1.08%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-18</td><td>6,792.75</td><td class="flat">-2.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-22</td><td>6,653.00</td><td class="flat">+0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-23</td><td>6,665.25</td><td class="flat">+0.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-01-24</td><td>6,675.00</td><td class="up">+1.74%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-25</td><td>6,791.25</td><td class="flat">-1.32%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-28</td><td>6,701.75</td><td class="flat">-0.94%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-01-29</td><td>6,638.75</td><td class="up">+2.99%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-01-30</td><td>6,837.25</td><td class="up">+1.13%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-01-31</td><td>6,914.75</td><td class="flat">-0.54%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-01</td><td>6,877.75</td><td class="flat">+0.87%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-02-04</td><td>6,937.50</td><td class="up">+1.02%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-05</td><td>7,008.00</td><td class="flat">-0.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-06</td><td>6,995.75</td><td class="flat">-1.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-07</td><td>6,905.50</td><td class="flat">+0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-08</td><td>6,916.75</td><td class="flat">-0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-02-11</td><td>6,914.25</td><td class="up">+1.51%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-12</td><td>7,018.50</td><td class="flat">-0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-13</td><td>7,016.25</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-14</td><td>7,019.75</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-15</td><td>7,063.75</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-19</td><td>7,068.25</td><td class="flat">+0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-20</td><td>7,073.25</td><td class="flat">-0.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-21</td><td>7,034.50</td><td class="flat">+0.76%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-22</td><td>7,088.25</td><td class="flat">+0.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-25</td><td>7,125.75</td><td class="flat">-0.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-26</td><td>7,117.75</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-27</td><td>7,121.75</td><td class="flat">-0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-02-28</td><td>7,102.50</td><td class="flat">+0.75%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-01</td><td>7,156.00</td><td class="flat">-0.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-04</td><td>7,145.75</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-05</td><td>7,165.50</td><td class="flat">-0.76%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-06</td><td>7,111.25</td><td class="flat">-1.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-07</td><td>7,027.50</td><td class="flat">-0.01%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-03-08</td><td>7,026.75</td><td class="up">+1.96%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-11</td><td>7,164.75</td><td class="flat">+0.58%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-12</td><td>7,206.50</td><td class="flat">+0.85%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-13</td><td>7,267.75</td><td class="flat">-0.39%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-14</td><td>7,239.75</td><td class="flat">+0.42%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-03-15</td><td>7,270.35</td><td class="up">+1.24%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-18</td><td>7,360.75</td><td class="flat">+0.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-19</td><td>7,376.50</td><td class="flat">+0.45%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-03-20</td><td>7,409.50</td><td class="up">+1.69%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-21</td><td>7,534.50</td><td class="flat">-2.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-22</td><td>7,368.75</td><td class="flat">-0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-25</td><td>7,355.25</td><td class="flat">+0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-26</td><td>7,376.75</td><td class="flat">-0.57%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-27</td><td>7,334.50</td><td class="flat">+0.24%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-03-28</td><td>7,352.00</td><td class="flat">+0.66%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-03-29</td><td>7,400.50</td><td class="up">+1.32%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-01</td><td>7,498.50</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-02</td><td>7,519.25</td><td class="flat">+0.84%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-03</td><td>7,582.25</td><td class="flat">-0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-04</td><td>7,561.50</td><td class="flat">+0.57%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-05</td><td>7,604.25</td><td class="flat">+0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-08</td><td>7,623.50</td><td class="flat">-0.40%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-09</td><td>7,593.25</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-10</td><td>7,641.25</td><td class="flat">-0.31%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-11</td><td>7,617.25</td><td class="flat">+0.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-12</td><td>7,652.25</td><td class="flat">-0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-15</td><td>7,647.75</td><td class="flat">+0.42%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-16</td><td>7,679.50</td><td class="flat">+0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-17</td><td>7,689.75</td><td class="flat">+0.30%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-18</td><td>7,712.50</td><td class="flat">+0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-04-22</td><td>7,734.75</td><td class="up">+1.33%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-23</td><td>7,838.00</td><td class="flat">+0.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-24</td><td>7,847.75</td><td class="flat">-0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-25</td><td>7,798.50</td><td class="flat">+0.54%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-26</td><td>7,840.25</td><td class="flat">-0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-29</td><td>7,813.75</td><td class="flat">-0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-04-30</td><td>7,800.00</td><td class="flat">-0.56%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-01</td><td>7,756.50</td><td class="flat">-0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-05-02</td><td>7,734.25</td><td class="up">+1.69%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-03</td><td>7,865.00</td><td class="flat">-0.78%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-06</td><td>7,803.50</td><td class="flat">-1.66%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-07</td><td>7,674.00</td><td class="flat">-0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-08</td><td>7,647.50</td><td class="flat">-0.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-09</td><td>7,595.25</td><td class="flat">+0.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-10</td><td>7,610.25</td><td class="flat">-3.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-05-13</td><td>7,314.75</td><td class="up">+1.45%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-05-14</td><td>7,421.00</td><td class="up">+1.46%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-15</td><td>7,529.25</td><td class="flat">+0.94%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-16</td><td>7,600.25</td><td class="flat">-1.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-17</td><td>7,511.50</td><td class="flat">-1.59%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-20</td><td>7,391.75</td><td class="flat">+0.98%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-21</td><td>7,464.00</td><td class="flat">-0.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-22</td><td>7,430.00</td><td class="flat">-1.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-23</td><td>7,311.00</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-24</td><td>7,315.50</td><td class="flat">-0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-28</td><td>7,295.25</td><td class="flat">-1.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-29</td><td>7,216.00</td><td class="flat">+0.54%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-30</td><td>7,255.25</td><td class="flat">-1.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-05-31</td><td>7,133.50</td><td class="flat">-1.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-06-03</td><td>6,993.75</td><td class="up">+2.65%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-04</td><td>7,179.25</td><td class="flat">+0.69%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-05</td><td>7,228.50</td><td class="flat">+0.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-06-06</td><td>7,282.25</td><td class="up">+1.88%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-06-07</td><td>7,419.50</td><td class="up">+1.29%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-10</td><td>7,515.50</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-11</td><td>7,518.25</td><td class="flat">-0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-12</td><td>7,473.25</td><td class="flat">+0.66%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-13</td><td>7,522.75</td><td class="flat">-0.59%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-14</td><td>7,478.25</td><td class="flat">+0.75%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-06-17</td><td>7,534.25</td><td class="up">+1.47%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-18</td><td>7,645.25</td><td class="flat">+0.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-19</td><td>7,674.25</td><td class="flat">+0.93%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-20</td><td>7,745.25</td><td class="flat">-0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-21</td><td>7,723.61</td><td class="flat">+0.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-24</td><td>7,758.75</td><td class="flat">-1.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-25</td><td>7,628.75</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-26</td><td>7,650.00</td><td class="flat">+0.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-06-27</td><td>7,690.50</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-06-28</td><td>7,693.75</td><td class="up">+1.25%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-01</td><td>7,790.00</td><td class="flat">+0.62%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-02</td><td>7,838.25</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-03</td><td>7,887.50</td><td class="flat">-0.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-05</td><td>7,851.50</td><td class="flat">-0.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-08</td><td>7,801.00</td><td class="flat">+0.57%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-07-09</td><td>7,845.25</td><td class="up">+1.06%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-10</td><td>7,928.75</td><td class="flat">-0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-11</td><td>7,918.75</td><td class="flat">+0.52%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-12</td><td>7,960.00</td><td class="flat">+0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-15</td><td>7,986.75</td><td class="flat">-0.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-16</td><td>7,942.75</td><td class="flat">-0.72%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-17</td><td>7,885.50</td><td class="flat">+0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-18</td><td>7,933.50</td><td class="flat">-1.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-07-19</td><td>7,842.75</td><td class="up">+1.05%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-22</td><td>7,924.75</td><td class="flat">+0.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-23</td><td>7,983.75</td><td class="flat">+0.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-24</td><td>8,038.00</td><td class="flat">-0.70%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-25</td><td>7,981.75</td><td class="flat">+0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-26</td><td>8,019.75</td><td class="flat">-0.23%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-29</td><td>8,001.25</td><td class="flat">-0.47%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-30</td><td>7,963.25</td><td class="flat">-1.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-07-31</td><td>7,866.75</td><td class="flat">-0.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-01</td><td>7,808.25</td><td class="flat">-1.36%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-02</td><td>7,702.25</td><td class="flat">-4.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-08-05</td><td>7,385.25</td><td class="up">+1.76%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-06</td><td>7,515.50</td><td class="flat">+0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-08-07</td><td>7,553.25</td><td class="up">+2.42%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-08</td><td>7,735.75</td><td class="flat">-0.98%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-09</td><td>7,660.25</td><td class="flat">-1.22%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-08-12</td><td>7,566.75</td><td class="up">+2.40%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-13</td><td>7,748.00</td><td class="flat">-3.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-14</td><td>7,488.75</td><td class="flat">+0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-08-15</td><td>7,496.25</td><td class="up">+1.54%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-08-16</td><td>7,611.75</td><td class="up">+1.52%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-19</td><td>7,727.50</td><td class="flat">-0.77%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-08-20</td><td>7,668.00</td><td class="up">+1.07%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-21</td><td>7,750.25</td><td class="flat">-0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-22</td><td>7,711.25</td><td class="flat">-2.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-08-23</td><td>7,504.50</td><td class="up">+1.15%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-26</td><td>7,590.50</td><td class="flat">-0.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-27</td><td>7,562.75</td><td class="flat">+0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-08-28</td><td>7,599.25</td><td class="up">+1.48%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-29</td><td>7,712.00</td><td class="flat">-0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-08-30</td><td>7,690.75</td><td class="flat">-0.95%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-09-03</td><td>7,617.50</td><td class="up">+1.38%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-09-04</td><td>7,722.75</td><td class="up">+1.72%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-05</td><td>7,855.50</td><td class="flat">+0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-06</td><td>7,857.75</td><td class="flat">-0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-09</td><td>7,830.75</td><td class="flat">-0.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-10</td><td>7,815.00</td><td class="flat">+0.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-11</td><td>7,889.75</td><td class="flat">+0.40%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-12</td><td>7,921.50</td><td class="flat">-0.45%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-13</td><td>7,886.00</td><td class="flat">-0.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-16</td><td>7,856.50</td><td class="flat">+0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-17</td><td>7,890.25</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-18</td><td>7,894.25</td><td class="flat">+0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-19</td><td>7,896.25</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-20</td><td>7,899.48</td><td class="flat">-0.62%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-23</td><td>7,850.50</td><td class="flat">-1.47%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-09-24</td><td>7,735.25</td><td class="up">+1.10%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-25</td><td>7,820.25</td><td class="flat">-0.42%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-26</td><td>7,787.25</td><td class="flat">-1.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-27</td><td>7,701.25</td><td class="flat">+0.90%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-09-30</td><td>7,770.50</td><td class="flat">-0.97%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-01</td><td>7,695.50</td><td class="flat">-1.94%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-10-02</td><td>7,546.25</td><td class="up">+1.49%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-10-03</td><td>7,658.50</td><td class="up">+1.42%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-04</td><td>7,767.25</td><td class="flat">-0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-07</td><td>7,740.00</td><td class="flat">-1.52%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-10-08</td><td>7,622.00</td><td class="up">+1.02%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-09</td><td>7,699.75</td><td class="flat">+0.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-10-10</td><td>7,760.25</td><td class="up">+1.27%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-11</td><td>7,859.00</td><td class="flat">-0.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-10-14</td><td>7,857.50</td><td class="up">+1.30%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-15</td><td>7,959.75</td><td class="flat">-0.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-16</td><td>7,948.50</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-17</td><td>7,952.75</td><td class="flat">-0.91%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-18</td><td>7,880.75</td><td class="flat">+0.86%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-21</td><td>7,948.25</td><td class="flat">-1.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-22</td><td>7,858.75</td><td class="flat">+0.54%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-23</td><td>7,901.50</td><td class="flat">+0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-10-24</td><td>7,928.25</td><td class="up">+1.36%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-25</td><td>8,035.75</td><td class="flat">+0.73%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-28</td><td>8,094.75</td><td class="flat">-0.49%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-29</td><td>8,055.25</td><td class="flat">+0.70%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-30</td><td>8,111.25</td><td class="flat">-0.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-10-31</td><td>8,090.25</td><td class="flat">+0.87%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-01</td><td>8,160.25</td><td class="flat">+0.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-04</td><td>8,215.75</td><td class="flat">-0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-05</td><td>8,210.75</td><td class="flat">-0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-06</td><td>8,207.25</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-07</td><td>8,230.50</td><td class="flat">+0.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-08</td><td>8,257.25</td><td class="flat">-0.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-11</td><td>8,249.75</td><td class="flat">+0.31%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-12</td><td>8,275.00</td><td class="flat">-0.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-13</td><td>8,265.75</td><td class="flat">-0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-14</td><td>8,265.50</td><td class="flat">+0.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-15</td><td>8,318.75</td><td class="flat">+0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-18</td><td>8,333.50</td><td class="flat">+0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-19</td><td>8,341.50</td><td class="flat">-0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-20</td><td>8,291.75</td><td class="flat">-0.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-21</td><td>8,274.50</td><td class="flat">+0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-11-22</td><td>8,280.50</td><td class="up">+1.16%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-25</td><td>8,376.50</td><td class="flat">+0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-26</td><td>8,400.75</td><td class="flat">+0.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-27</td><td>8,454.75</td><td class="flat">-0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-11-29</td><td>8,417.50</td><td class="flat">-1.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-02</td><td>8,316.00</td><td class="flat">-0.78%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-03</td><td>8,251.25</td><td class="flat">+0.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-04</td><td>8,295.25</td><td class="flat">+0.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-12-05</td><td>8,309.25</td><td class="up">+1.10%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-06</td><td>8,400.25</td><td class="flat">-0.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-09</td><td>8,356.00</td><td class="flat">+0.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-10</td><td>8,363.75</td><td class="flat">+0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-11</td><td>8,405.50</td><td class="flat">+0.71%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-12</td><td>8,465.25</td><td class="flat">+0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-13</td><td>8,494.00</td><td class="flat">+0.97%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-16</td><td>8,576.00</td><td class="flat">+0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-17</td><td>8,576.25</td><td class="flat">+0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-18</td><td>8,590.25</td><td class="flat">+0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-19</td><td>8,642.50</td><td class="flat">+0.75%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-20</td><td>8,707.46</td><td class="flat">+0.22%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-23</td><td>8,726.50</td><td class="flat">+0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-24</td><td>8,729.50</td><td class="flat">+0.86%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-26</td><td>8,804.25</td><td class="flat">-0.24%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-27</td><td>8,783.25</td><td class="flat">-0.56%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2019-12-30</td><td>8,733.75</td><td class="flat">+0.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2019-12-31</td><td>8,752.25</td><td class="up">+1.59%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-02</td><td>8,891.75</td><td class="flat">-0.92%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-03</td><td>8,810.00</td><td class="flat">+0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-06</td><td>8,847.50</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-01-07</td><td>8,853.00</td><td class="up">+1.03%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-08</td><td>8,944.50</td><td class="flat">+0.72%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-09</td><td>9,009.00</td><td class="flat">-0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-01-10</td><td>8,978.25</td><td class="up">+1.23%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-13</td><td>9,088.25</td><td class="flat">-0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-14</td><td>9,062.50</td><td class="flat">-0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-15</td><td>9,060.00</td><td class="flat">+0.81%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-16</td><td>9,133.50</td><td class="flat">+0.45%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-17</td><td>9,174.50</td><td class="flat">-0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-21</td><td>9,169.75</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-22</td><td>9,195.75</td><td class="flat">+0.57%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-23</td><td>9,248.25</td><td class="flat">-1.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-24</td><td>9,144.50</td><td class="flat">-2.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-01-27</td><td>8,954.50</td><td class="up">+1.68%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-28</td><td>9,105.25</td><td class="flat">-0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-01-29</td><td>9,098.50</td><td class="up">+1.29%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-01-30</td><td>9,216.25</td><td class="flat">-2.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-01-31</td><td>8,997.75</td><td class="up">+1.29%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-02-03</td><td>9,114.25</td><td class="up">+2.64%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-04</td><td>9,355.00</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-05</td><td>9,381.50</td><td class="flat">+0.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-06</td><td>9,455.50</td><td class="flat">-0.49%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-02-07</td><td>9,409.50</td><td class="up">+1.25%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-10</td><td>9,527.50</td><td class="flat">-0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-02-11</td><td>9,527.25</td><td class="up">+1.03%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-12</td><td>9,625.75</td><td class="flat">-0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-13</td><td>9,613.00</td><td class="flat">+0.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-14</td><td>9,632.25</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-02-18</td><td>9,636.00</td><td class="up">+1.01%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-19</td><td>9,733.50</td><td class="flat">-1.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-20</td><td>9,624.25</td><td class="flat">-1.73%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-21</td><td>9,458.00</td><td class="flat">-3.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-24</td><td>9,091.00</td><td class="flat">-2.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-25</td><td>8,854.25</td><td class="flat">-0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-26</td><td>8,850.25</td><td class="flat">-5.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-02-27</td><td>8,382.75</td><td class="flat">+0.85%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-02-28</td><td>8,454.00</td><td class="up">+3.99%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-02</td><td>8,791.25</td><td class="flat">-2.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-03-03</td><td>8,582.50</td><td class="up">+3.66%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-04</td><td>8,896.50</td><td class="flat">-2.78%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-05</td><td>8,648.75</td><td class="flat">-1.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-06</td><td>8,503.25</td><td class="flat">-6.49%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-03-09</td><td>7,951.50</td><td class="up">+4.78%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-10</td><td>8,331.50</td><td class="flat">-3.94%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-11</td><td>8,003.50</td><td class="flat">-9.85%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-03-12</td><td>7,215.25</td><td class="up">+9.71%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-13</td><td>7,915.75</td><td class="flat">-10.84%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-03-16</td><td>7,057.50</td><td class="up">+4.93%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-17</td><td>7,405.25</td><td class="flat">-2.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-18</td><td>7,225.25</td><td class="flat">+0.94%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-03-19</td><td>7,293.50</td><td class="up">+1.71%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-20</td><td>7,417.98</td><td class="flat">-5.84%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-03-23</td><td>6,984.50</td><td class="up">+8.16%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-24</td><td>7,554.75</td><td class="flat">-1.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-03-25</td><td>7,467.75</td><td class="up">+5.04%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-26</td><td>7,844.00</td><td class="flat">-3.51%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-03-27</td><td>7,568.50</td><td class="up">+3.78%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-30</td><td>7,854.75</td><td class="flat">-0.87%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-03-31</td><td>7,786.25</td><td class="flat">-4.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-01</td><td>7,438.75</td><td class="up">+2.53%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-02</td><td>7,627.25</td><td class="flat">-1.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-03</td><td>7,522.75</td><td class="up">+6.74%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-06</td><td>8,029.75</td><td class="flat">-0.22%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-07</td><td>8,012.00</td><td class="up">+2.22%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-08</td><td>8,189.75</td><td class="flat">+0.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-09</td><td>8,227.50</td><td class="up">+1.21%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-13</td><td>8,327.25</td><td class="up">+4.39%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-14</td><td>8,692.50</td><td class="flat">-1.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-15</td><td>8,594.00</td><td class="up">+1.63%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-16</td><td>8,734.25</td><td class="flat">+0.86%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-17</td><td>8,809.00</td><td class="flat">-1.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-20</td><td>8,692.00</td><td class="flat">-2.99%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-21</td><td>8,431.75</td><td class="up">+2.45%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-22</td><td>8,638.00</td><td class="flat">-0.45%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-23</td><td>8,598.75</td><td class="up">+1.98%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-24</td><td>8,769.00</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-27</td><td>8,824.25</td><td class="flat">-1.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-04-28</td><td>8,719.75</td><td class="up">+3.63%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-29</td><td>9,036.50</td><td class="flat">-0.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-04-30</td><td>8,988.50</td><td class="flat">-3.01%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-01</td><td>8,718.00</td><td class="flat">+0.89%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-05-04</td><td>8,795.50</td><td class="up">+1.46%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-05</td><td>8,924.25</td><td class="flat">+0.31%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-05-06</td><td>8,952.00</td><td class="up">+1.74%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-05-07</td><td>9,107.75</td><td class="up">+1.21%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-08</td><td>9,218.25</td><td class="flat">+0.66%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-11</td><td>9,279.00</td><td class="flat">-2.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-12</td><td>9,078.25</td><td class="flat">-0.95%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-13</td><td>8,992.25</td><td class="flat">+0.97%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-14</td><td>9,079.50</td><td class="flat">+0.19%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-05-15</td><td>9,096.50</td><td class="up">+2.52%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-18</td><td>9,325.50</td><td class="flat">-0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-05-19</td><td>9,300.75</td><td class="up">+1.99%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-20</td><td>9,485.50</td><td class="flat">-1.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-21</td><td>9,355.75</td><td class="flat">+0.54%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-22</td><td>9,406.25</td><td class="flat">+0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-26</td><td>9,406.50</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-27</td><td>9,432.50</td><td class="flat">+0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-05-28</td><td>9,460.25</td><td class="up">+1.06%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-05-29</td><td>9,560.25</td><td class="flat">+0.36%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-01</td><td>9,595.00</td><td class="flat">+0.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-02</td><td>9,647.75</td><td class="flat">+0.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-03</td><td>9,684.75</td><td class="flat">-0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-06-04</td><td>9,626.25</td><td class="up">+1.89%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-05</td><td>9,808.50</td><td class="flat">+0.78%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-08</td><td>9,884.75</td><td class="flat">+0.67%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-06-09</td><td>9,951.00</td><td class="up">+1.37%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-10</td><td>10,087.25</td><td class="flat">-4.66%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-11</td><td>9,616.75</td><td class="flat">+0.29%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-06-12</td><td>9,645.00</td><td class="up">+1.61%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-06-15</td><td>9,800.50</td><td class="up">+1.75%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-16</td><td>9,972.50</td><td class="flat">+0.22%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-17</td><td>9,994.50</td><td class="flat">+0.01%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-06-18</td><td>9,995.75</td><td class="up">+1.25%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-19</td><td>10,120.84</td><td class="flat">+0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-22</td><td>10,124.75</td><td class="flat">+0.70%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-23</td><td>10,196.00</td><td class="flat">-1.82%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-24</td><td>10,010.75</td><td class="flat">+0.77%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-06-25</td><td>10,088.25</td><td class="flat">-2.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-06-26</td><td>9,865.50</td><td class="up">+1.10%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-06-29</td><td>9,973.75</td><td class="up">+1.74%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-06-30</td><td>10,147.25</td><td class="up">+1.20%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-01</td><td>10,268.75</td><td class="flat">+0.85%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-02</td><td>10,355.75</td><td class="up">+2.34%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-06</td><td>10,598.50</td><td class="flat">-0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-07</td><td>10,532.25</td><td class="up">+1.23%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-08</td><td>10,662.25</td><td class="flat">+0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-09</td><td>10,727.50</td><td class="up">+1.02%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-10</td><td>10,837.25</td><td class="flat">-2.19%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-13</td><td>10,600.00</td><td class="flat">+0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-14</td><td>10,646.25</td><td class="flat">+0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-15</td><td>10,683.25</td><td class="flat">-1.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-16</td><td>10,511.75</td><td class="up">+1.05%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-17</td><td>10,622.50</td><td class="up">+3.09%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-20</td><td>10,951.00</td><td class="flat">-0.91%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-21</td><td>10,851.00</td><td class="flat">-0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-22</td><td>10,804.25</td><td class="flat">-2.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-23</td><td>10,548.25</td><td class="flat">-0.85%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-24</td><td>10,459.00</td><td class="up">+2.07%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-27</td><td>10,675.25</td><td class="flat">-1.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-28</td><td>10,540.00</td><td class="up">+1.27%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-29</td><td>10,674.25</td><td class="up">+1.12%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-07-30</td><td>10,794.00</td><td class="flat">+0.89%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-07-31</td><td>10,890.50</td><td class="up">+1.41%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-03</td><td>11,044.25</td><td class="flat">+0.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-04</td><td>11,086.00</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-08-05</td><td>11,091.75</td><td class="up">+1.53%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-06</td><td>11,261.25</td><td class="flat">-1.23%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-07</td><td>11,122.75</td><td class="flat">-0.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-10</td><td>11,072.00</td><td class="flat">-1.75%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-08-11</td><td>10,878.50</td><td class="up">+2.28%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-12</td><td>11,126.00</td><td class="flat">+0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-13</td><td>11,175.25</td><td class="flat">-0.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-08-14</td><td>11,133.75</td><td class="up">+1.37%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-08-17</td><td>11,286.75</td><td class="up">+1.09%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-18</td><td>11,409.25</td><td class="flat">-0.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-08-19</td><td>11,332.00</td><td class="up">+1.28%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-20</td><td>11,477.25</td><td class="flat">+0.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-21</td><td>11,562.00</td><td class="flat">+0.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-24</td><td>11,636.25</td><td class="flat">+0.77%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-08-25</td><td>11,726.25</td><td class="up">+2.26%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-26</td><td>11,991.25</td><td class="flat">-0.32%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-08-27</td><td>11,952.75</td><td class="flat">+0.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-08-28</td><td>11,991.75</td><td class="up">+1.02%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-08-31</td><td>12,114.00</td><td class="up">+1.64%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-01</td><td>12,312.50</td><td class="flat">+0.80%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-02</td><td>12,411.50</td><td class="flat">-4.92%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-03</td><td>11,800.50</td><td class="flat">-2.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-04</td><td>11,548.75</td><td class="flat">-4.23%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-09-08</td><td>11,060.50</td><td class="up">+3.00%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-09</td><td>11,392.75</td><td class="flat">-1.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-10</td><td>11,178.25</td><td class="flat">-1.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-09-11</td><td>11,061.50</td><td class="up">+1.98%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-09-14</td><td>11,280.50</td><td class="up">+1.63%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-15</td><td>11,464.25</td><td class="flat">-1.71%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-16</td><td>11,268.75</td><td class="flat">-1.59%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-17</td><td>11,090.00</td><td class="flat">+0.49%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-18</td><td>11,144.81</td><td class="flat">-1.40%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-09-21</td><td>10,989.00</td><td class="up">+1.46%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-22</td><td>11,149.50</td><td class="flat">-2.87%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-23</td><td>10,829.00</td><td class="flat">+0.58%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-09-24</td><td>10,891.75</td><td class="up">+2.25%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-09-25</td><td>11,136.50</td><td class="up">+2.32%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-28</td><td>11,394.75</td><td class="flat">-0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-09-29</td><td>11,337.75</td><td class="flat">+0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-09-30</td><td>11,407.25</td><td class="up">+1.47%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-01</td><td>11,574.75</td><td class="flat">-2.95%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-10-02</td><td>11,233.25</td><td class="up">+2.10%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-05</td><td>11,469.25</td><td class="flat">-1.70%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-10-06</td><td>11,273.75</td><td class="up">+1.74%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-07</td><td>11,470.00</td><td class="flat">+0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-10-08</td><td>11,539.00</td><td class="up">+1.61%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-10-09</td><td>11,724.75</td><td class="up">+3.19%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-12</td><td>12,098.25</td><td class="flat">-0.04%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-13</td><td>12,094.00</td><td class="flat">-0.99%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-14</td><td>11,974.25</td><td class="flat">-0.84%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-15</td><td>11,874.00</td><td class="flat">-0.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-16</td><td>11,798.00</td><td class="flat">-1.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-19</td><td>11,650.25</td><td class="flat">+0.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-20</td><td>11,660.75</td><td class="flat">+0.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-21</td><td>11,691.25</td><td class="flat">-0.36%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-22</td><td>11,649.75</td><td class="flat">+0.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-23</td><td>11,663.50</td><td class="flat">-1.47%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-26</td><td>11,492.25</td><td class="flat">+0.83%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-27</td><td>11,588.00</td><td class="flat">-3.93%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-10-28</td><td>11,132.75</td><td class="up">+1.89%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-29</td><td>11,342.75</td><td class="flat">-2.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-10-30</td><td>11,046.25</td><td class="flat">+0.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-11-02</td><td>11,063.25</td><td class="up">+1.83%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-11-03</td><td>11,265.75</td><td class="up">+4.41%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-11-04</td><td>11,763.00</td><td class="up">+2.67%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-05</td><td>12,076.50</td><td class="flat">-0.01%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-06</td><td>12,075.00</td><td class="flat">-2.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-09</td><td>11,820.50</td><td class="flat">-1.71%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-11-10</td><td>11,618.25</td><td class="up">+2.30%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-11</td><td>11,886.00</td><td class="flat">-0.56%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-12</td><td>11,820.00</td><td class="flat">+0.96%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-13</td><td>11,933.50</td><td class="flat">+0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-16</td><td>12,005.00</td><td class="flat">-0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-17</td><td>11,975.00</td><td class="flat">-0.65%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-18</td><td>11,897.00</td><td class="flat">+0.76%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-19</td><td>11,987.25</td><td class="flat">-0.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-20</td><td>11,905.75</td><td class="flat">-0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-11-23</td><td>11,905.25</td><td class="up">+1.43%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-24</td><td>12,076.00</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-25</td><td>12,152.25</td><td class="flat">+0.87%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-11-27</td><td>12,257.50</td><td class="flat">+0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-11-30</td><td>12,277.00</td><td class="up">+1.43%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-01</td><td>12,452.25</td><td class="flat">+0.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-02</td><td>12,454.25</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-03</td><td>12,462.25</td><td class="flat">+0.51%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-04</td><td>12,526.00</td><td class="flat">+0.56%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-07</td><td>12,596.00</td><td class="flat">+0.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-08</td><td>12,637.50</td><td class="flat">-2.14%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-09</td><td>12,367.00</td><td class="flat">+0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-10</td><td>12,402.00</td><td class="flat">-0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-11</td><td>12,368.00</td><td class="flat">+0.72%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-12-14</td><td>12,456.50</td><td class="up">+1.09%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-15</td><td>12,591.75</td><td class="flat">+0.58%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-16</td><td>12,665.25</td><td class="flat">+0.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-17</td><td>12,751.00</td><td class="flat">+0.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-18</td><td>12,800.06</td><td class="flat">-0.91%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-21</td><td>12,683.50</td><td class="flat">+0.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-22</td><td>12,710.00</td><td class="flat">-0.46%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-23</td><td>12,651.25</td><td class="flat">+0.42%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2020-12-24</td><td>12,704.50</td><td class="up">+1.01%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-28</td><td>12,832.75</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-29</td><td>12,841.00</td><td class="flat">+0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-30</td><td>12,841.50</td><td class="flat">+0.34%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2020-12-31</td><td>12,885.50</td><td class="flat">-1.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-04</td><td>12,685.50</td><td class="flat">+0.85%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-05</td><td>12,793.50</td><td class="flat">-1.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-01-06</td><td>12,616.75</td><td class="up">+2.47%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-01-07</td><td>12,928.00</td><td class="up">+1.31%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-08</td><td>13,097.25</td><td class="flat">-1.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-11</td><td>12,897.00</td><td class="flat">-0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-12</td><td>12,890.25</td><td class="flat">+0.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-13</td><td>12,972.25</td><td class="flat">-0.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-14</td><td>12,901.00</td><td class="flat">-0.77%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-01-15</td><td>12,802.25</td><td class="up">+1.43%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-01-19</td><td>12,985.50</td><td class="up">+2.38%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-20</td><td>13,294.25</td><td class="flat">+0.76%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-21</td><td>13,395.50</td><td class="flat">-0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-22</td><td>13,361.50</td><td class="flat">+0.85%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-25</td><td>13,475.50</td><td class="flat">+0.07%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-26</td><td>13,485.50</td><td class="flat">-2.82%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-27</td><td>13,105.50</td><td class="flat">+0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-01-28</td><td>13,186.00</td><td class="flat">-2.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-01-29</td><td>12,911.25</td><td class="up">+2.52%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-02-01</td><td>13,236.50</td><td class="up">+1.61%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-02</td><td>13,449.00</td><td class="flat">-0.41%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-02-03</td><td>13,394.25</td><td class="up">+1.14%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-04</td><td>13,547.50</td><td class="flat">+0.37%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-05</td><td>13,598.00</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-08</td><td>13,683.00</td><td class="flat">-0.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-09</td><td>13,680.25</td><td class="flat">-0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-10</td><td>13,643.50</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-11</td><td>13,729.00</td><td class="flat">+0.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-12</td><td>13,804.75</td><td class="flat">-0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-16</td><td>13,767.75</td><td class="flat">-0.49%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-17</td><td>13,699.75</td><td class="flat">-0.49%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-18</td><td>13,633.00</td><td class="flat">-0.42%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-19</td><td>13,576.00</td><td class="flat">-2.59%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-22</td><td>13,224.25</td><td class="flat">-0.24%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-23</td><td>13,192.00</td><td class="flat">+0.83%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-24</td><td>13,302.00</td><td class="flat">-3.54%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-02-25</td><td>12,831.75</td><td class="flat">+0.62%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-02-26</td><td>12,911.00</td><td class="up">+2.86%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-01</td><td>13,279.75</td><td class="flat">-1.69%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-02</td><td>13,055.25</td><td class="flat">-2.86%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-03</td><td>12,681.75</td><td class="flat">-1.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-03-04</td><td>12,455.00</td><td class="up">+1.68%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-05</td><td>12,663.75</td><td class="flat">-2.89%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-03-08</td><td>12,297.25</td><td class="up">+4.00%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-09</td><td>12,788.75</td><td class="flat">-0.31%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-03-10</td><td>12,749.25</td><td class="up">+2.35%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-11</td><td>13,048.25</td><td class="flat">-0.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-03-12</td><td>12,933.50</td><td class="up">+1.12%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-15</td><td>13,078.50</td><td class="flat">+0.56%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-16</td><td>13,151.50</td><td class="flat">+0.38%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-17</td><td>13,201.50</td><td class="flat">-3.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-18</td><td>12,795.50</td><td class="flat">+0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-03-19</td><td>12,808.76</td><td class="up">+2.05%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-22</td><td>13,071.75</td><td class="flat">-0.50%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-23</td><td>13,006.25</td><td class="flat">-1.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-24</td><td>12,794.00</td><td class="flat">-0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-03-25</td><td>12,770.50</td><td class="up">+1.54%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-26</td><td>12,966.75</td><td class="flat">-0.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-03-29</td><td>12,944.50</td><td class="flat">-0.51%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-03-30</td><td>12,878.25</td><td class="up">+1.64%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-03-31</td><td>13,089.75</td><td class="up">+1.73%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-04-01</td><td>13,316.00</td><td class="up">+2.02%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-05</td><td>13,585.50</td><td class="flat">-0.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-06</td><td>13,570.00</td><td class="flat">+0.26%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-04-07</td><td>13,604.75</td><td class="up">+1.05%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-08</td><td>13,747.75</td><td class="flat">+0.59%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-09</td><td>13,829.50</td><td class="flat">-0.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-04-12</td><td>13,808.75</td><td class="up">+1.21%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-13</td><td>13,975.75</td><td class="flat">-1.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-04-14</td><td>13,798.75</td><td class="up">+1.56%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-15</td><td>14,014.00</td><td class="flat">+0.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-16</td><td>14,029.50</td><td class="flat">-0.94%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-19</td><td>13,897.25</td><td class="flat">-0.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-20</td><td>13,794.25</td><td class="flat">+0.91%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-21</td><td>13,919.25</td><td class="flat">-1.21%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-04-22</td><td>13,750.25</td><td class="up">+1.29%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-23</td><td>13,927.00</td><td class="flat">+0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-26</td><td>14,011.50</td><td class="flat">-0.42%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-27</td><td>13,953.00</td><td class="flat">-0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-28</td><td>13,892.25</td><td class="flat">+0.44%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-29</td><td>13,953.50</td><td class="flat">-0.74%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-04-30</td><td>13,850.00</td><td class="flat">-0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-03</td><td>13,790.00</td><td class="flat">-1.84%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-04</td><td>13,536.00</td><td class="flat">-0.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-05</td><td>13,491.00</td><td class="flat">+0.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-06</td><td>13,597.75</td><td class="flat">+0.82%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-07</td><td>13,709.75</td><td class="flat">-2.57%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-10</td><td>13,356.75</td><td class="flat">-0.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-11</td><td>13,346.00</td><td class="flat">-2.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-12</td><td>12,998.50</td><td class="flat">+0.78%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-05-13</td><td>13,100.25</td><td class="up">+2.19%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-14</td><td>13,387.00</td><td class="flat">-0.62%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-17</td><td>13,303.50</td><td class="flat">-0.69%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-18</td><td>13,212.00</td><td class="flat">+0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-05-19</td><td>13,233.50</td><td class="up">+1.91%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-20</td><td>13,486.50</td><td class="flat">-0.60%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-05-21</td><td>13,405.00</td><td class="up">+1.72%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-24</td><td>13,635.25</td><td class="flat">+0.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-25</td><td>13,656.25</td><td class="flat">+0.32%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-26</td><td>13,700.25</td><td class="flat">-0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-27</td><td>13,665.50</td><td class="flat">+0.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-05-28</td><td>13,686.50</td><td class="flat">-0.28%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-01</td><td>13,648.75</td><td class="flat">+0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-02</td><td>13,673.75</td><td class="flat">-1.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-06-03</td><td>13,529.25</td><td class="up">+1.76%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-04</td><td>13,766.75</td><td class="flat">+0.27%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-07</td><td>13,804.25</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-08</td><td>13,811.50</td><td class="flat">+0.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-06-09</td><td>13,814.25</td><td class="up">+1.05%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-10</td><td>13,959.75</td><td class="flat">+0.25%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-11</td><td>13,994.25</td><td class="flat">+0.93%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-14</td><td>14,124.75</td><td class="flat">-0.67%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-15</td><td>14,030.25</td><td class="flat">-0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-06-16</td><td>13,981.25</td><td class="up">+1.32%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-17</td><td>14,165.50</td><td class="flat">-0.41%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-18</td><td>14,107.43</td><td class="flat">+0.16%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-21</td><td>14,130.00</td><td class="flat">+0.91%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-22</td><td>14,258.25</td><td class="flat">+0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-23</td><td>14,263.00</td><td class="flat">+0.64%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-24</td><td>14,354.25</td><td class="flat">-0.11%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-06-25</td><td>14,339.00</td><td class="up">+1.21%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-28</td><td>14,512.50</td><td class="flat">+0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-29</td><td>14,563.00</td><td class="flat">-0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-06-30</td><td>14,549.00</td><td class="flat">-0.00%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-07-01</td><td>14,548.50</td><td class="up">+1.14%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-02</td><td>14,713.75</td><td class="flat">+0.42%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-06</td><td>14,775.50</td><td class="flat">+0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-07</td><td>14,802.25</td><td class="flat">-0.61%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-08</td><td>14,712.25</td><td class="flat">+0.67%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-09</td><td>14,810.50</td><td class="flat">+0.40%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-12</td><td>14,869.25</td><td class="flat">-0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-13</td><td>14,865.00</td><td class="flat">+0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-14</td><td>14,891.75</td><td class="flat">-0.70%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-15</td><td>14,787.50</td><td class="flat">-0.79%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-16</td><td>14,670.50</td><td class="flat">-0.88%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-07-19</td><td>14,540.75</td><td class="up">+1.25%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-20</td><td>14,722.75</td><td class="flat">+0.71%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-21</td><td>14,827.75</td><td class="flat">+0.68%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-07-22</td><td>14,928.50</td><td class="up">+1.14%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-23</td><td>15,098.00</td><td class="flat">+0.13%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-26</td><td>15,117.75</td><td class="flat">-1.12%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-27</td><td>14,947.75</td><td class="flat">+0.43%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-28</td><td>15,011.50</td><td class="flat">+0.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-29</td><td>15,037.75</td><td class="flat">-0.55%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-07-30</td><td>14,955.75</td><td class="flat">-0.02%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-02</td><td>14,952.75</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-03</td><td>15,046.25</td><td class="flat">+0.18%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-04</td><td>15,073.50</td><td class="flat">+0.63%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-05</td><td>15,167.75</td><td class="flat">-0.48%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-06</td><td>15,095.50</td><td class="flat">+0.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-09</td><td>15,125.25</td><td class="flat">-0.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-10</td><td>15,044.50</td><td class="flat">-0.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-11</td><td>15,019.50</td><td class="flat">+0.39%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-12</td><td>15,078.50</td><td class="flat">+0.31%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-13</td><td>15,125.75</td><td class="flat">+0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-16</td><td>15,134.00</td><td class="flat">-0.90%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-17</td><td>14,997.50</td><td class="flat">-0.99%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-18</td><td>14,849.25</td><td class="flat">+0.53%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-08-19</td><td>14,928.00</td><td class="up">+1.06%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-08-20</td><td>15,086.75</td><td class="up">+1.44%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-23</td><td>15,304.50</td><td class="flat">+0.33%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-24</td><td>15,355.50</td><td class="flat">+0.06%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-25</td><td>15,364.25</td><td class="flat">-0.58%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-26</td><td>15,274.75</td><td class="flat">+0.99%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="up c1"><td>2021-08-27</td><td>15,426.50</td><td class="up">+1.11%</td><td class="up">1</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-30</td><td>15,597.50</td><td class="flat">-0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-08-31</td><td>15,582.50</td><td class="flat">+0.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-01</td><td>15,609.25</td><td class="flat">-0.05%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-02</td><td>15,601.00</td><td class="flat">+0.32%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-03</td><td>15,651.50</td><td class="flat">+0.15%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-07</td><td>15,674.75</td><td class="flat">-0.35%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-08</td><td>15,620.00</td><td class="flat">-0.39%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-09</td><td>15,558.75</td><td class="flat">-0.75%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-10</td><td>15,441.50</td><td class="flat">-0.03%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-13</td><td>15,436.75</td><td class="flat">-0.32%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-14</td><td>15,387.00</td><td class="flat">+0.76%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-15</td><td>15,504.00</td><td class="flat">+0.09%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-16</td><td>15,517.75</td><td class="flat">-0.20%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-17</td><td>15,486.67</td><td class="flat">-3.08%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-20</td><td>15,009.50</td><td class="flat">+0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-21</td><td>15,024.00</td><td class="flat">+0.93%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-22</td><td>15,163.50</td><td class="flat">+0.92%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-23</td><td>15,303.50</td><td class="flat">+0.10%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-24</td><td>15,318.75</td><td class="flat">-0.81%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-27</td><td>15,194.75</td><td class="flat">-2.83%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-28</td><td>14,764.75</td><td class="flat">-0.17%</td><td class="flat">0</td><td class="flat">—</td></tr>
+<tr class="flat c0"><td>2021-09-29</td><td>14,739.75</td><td class="flat">-0.39%</td><td class="flat">0</td><td class="flat">—</td></tr><!-- /BAKE:ROWS --></tbody>
+            </table>
+          </div>
+          <div class="table-foot" id="session-foot"><!-- BAKE:FOOT --><span data-foot="all">1,028 of 1,028 evaluation dates · pred column blank because predictions were not persisted</span><span data-foot="1">211 of 1,028 evaluation dates · pred column blank because predictions were not persisted</span><span data-foot="0">817 of 1,028 evaluation dates · pred column blank because predictions were not persisted</span><!-- /BAKE:FOOT --></div>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>Course project · Western University · Fall 2024 · ECE9063 Data Analytics Foundations</span>
+      <span>First author JiaYi Che · 23/31 commits · no profitability claim · numbers labeled by source</span>
+    </footer>
+  </div>
+</body>
+</html>
